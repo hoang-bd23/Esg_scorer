@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header: Mức điểm tổng quan -->
+    <div class="glass-panel rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800">{{ result.company_name }}</h1>
+            <p class="text-slate-500 mt-1">Báo cáo ESG năm {{ result.year }} | Mô hình KLD</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex items-center gap-6">
+            <div class="text-center">
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-wide">ESG Score</p>
+                <p class="text-5xl font-black text-emerald-600">{{ "%.2f"|format(result.total_esg_score) }}</p>
+            </div>
+            <div class="h-16 w-px bg-slate-200"></div>
+            <div class="flex gap-4">
+                <div class="text-center">
+                    <p class="text-xs text-slate-500">Môi trường (E)</p>
+                    <p class="text-xl font-bold text-green-600">{{ "%.1f"|format(result.e_score *
+                        result.weights.e_weight) }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-slate-500">Xã hội (S)</p>
+                    <p class="text-xl font-bold text-blue-600">{{ "%.1f"|format(result.s_score *
+                        result.weights.s_weight) }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-slate-500">Quản trị (G)</p>
+                    <p class="text-xl font-bold text-purple-600">{{ "%.1f"|format(result.g_score *
+                        result.weights.g_weight) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if record_id %}
+    <div class="flex justify-end mt-2">
+        <form action="/result/{{ record_id }}/delete" method="POST"
+            onsubmit="return confirm('Bạn có chắc chắn muốn xoá bản phân tích này?');">
+            <button type="submit"
+                class="text-sm text-red-500 hover:text-white hover:bg-red-500 px-3 py-1 rounded-lg border border-red-200 transition-colors"><i
+                    class="fa-solid fa-trash mr-1"></i> Xoá báo cáo này</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Charts & Breakdown -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Radar Chart -->
+        <div class="glass-panel rounded-2xl p-6 lg:col-span-1">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Mức độ phát triển E-S-G</h3>
+            <div class="relative h-64 w-full">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chi tiết 6 thành phần -->
+        <div class="glass-panel rounded-2xl p-6 lg:col-span-2">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Chi tiết 6 Thành phần KLD</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for comp_name, comp in result.components.items() %}
+                <div class="border border-slate-200 rounded-xl p-4 bg-white">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-slate-700">{{ comp.name.value }}</span>
+                        <span
+                            class="text-sm font-bold {% if comp.net_score > 0 %}text-emerald-600{% elif comp.net_score < 0 %}text-red-500{% else %}text-slate-500{% endif %}">
+                            {{ "{:+} ".format(comp.net_score) }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <div class="text-green-600"><i class="fa-solid fa-plus-circle mr-1"></i>{{
+                            comp.strengths.total_score }} Strengths</div>
+                        <div class="text-red-500"><i class="fa-solid fa-minus-circle mr-1"></i>{{
+                            comp.concerns.total_score }} Concerns</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Môi trường (E)', 'Xã hội (S)', 'Quản trị (G)'],
+                datasets: [{
+                    label: 'Điểm hệ số net',
+                    data: [
+                        {{ result.e_score }},
+                {{ result.s_score }}, 
+                    {{ result.g_score }}
+                ],
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        borderColor: 'rgba(16, 185, 129, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+            }]
+        },
+        options: {
+        scales: {
+            r: {
+                angleLines: { display: true },
+                suggestedMin: -3,
+                suggestedMax: 5
+            }
+        },
+        plugins: { legend: { display: false } }
+    }
+    });
+});
+</script>
+{% endblock %}

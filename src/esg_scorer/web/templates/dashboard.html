@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-end mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800">Bảng Xếp Hạng ESG</h1>
+            <p class="text-slate-500 mt-1">Tổng hợp điểm số các doanh nghiệp đã được đánh giá</p>
+        </div>
+        <div>
+            <a href="/upload"
+                class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm">
+                <i class="fa-solid fa-plus mr-2"></i>Chấm điểm mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="glass-panel rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Hạng</th>
+                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Doanh nghiệp</th>
+                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Năm
+                        </th>
+                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">
+                            Environment (E)</th>
+                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Social
+                            (S)</th>
+                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">
+                            Governance (G)</th>
+                        <th class="p-4 text-xs font-bold text-emerald-600 uppercase tracking-wider text-center">Tổng ESG
+                        </th>
+                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Ngày
+                            phân tích</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    {% if not results %}
+                    <tr>
+                        <td colspan="8" class="p-8 text-center text-slate-500">
+                            Chưa có dữ liệu nào. Hãy <a href="/upload" class="text-emerald-500 font-medium">chấm điểm
+                                báo cáo đầu tiên</a>!
+                        </td>
+                    </tr>
+                    {% endif %}
+
+                    {% for item in results %}
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-4 text-slate-700 font-medium">#{{ loop.index }}</td>
+                        <td class="p-4">
+                            <div class="font-bold text-slate-800">{{ item.company_name }}</div>
+                            <div class="flex items-center gap-3 mt-1">
+                                <a href="/result/{{ item.id }}"
+                                    class="text-xs text-emerald-600 hover:text-emerald-700 hover:underline inline-block"><i
+                                        class="fa-solid fa-chart-pie mr-1"></i>Xem phân tích</a>
+                                <form action="/result/{{ item.id }}/delete" method="POST" class="inline"
+                                    onsubmit="return confirm('Bạn có chắc chắn muốn xoá bản phân tích này?');">
+                                    <button type="submit"
+                                        class="text-xs text-red-500 hover:text-red-700 hover:underline"><i
+                                            class="fa-solid fa-trash mr-1"></i>Xoá</button>
+                                </form>
+                            </div>
+                        </td>
+                        <td class="p-4 text-center text-slate-600">{{ item.year }}</td>
+                        <td class="p-4 text-center font-medium text-green-600">{{ "%.1f"|format(item.e_score) }}</td>
+                        <td class="p-4 text-center font-medium text-blue-600">{{ "%.1f"|format(item.s_score) }}</td>
+                        <td class="p-4 text-center font-medium text-purple-600">{{ "%.1f"|format(item.g_score) }}</td>
+                        <td class="p-4 text-center text-lg font-black text-emerald-600">{{
+                            "%.2f"|format(item.total_esg_score) }}</td>
+                        <td class="p-4 text-center text-sm text-slate-500">{{ item.created_at.strftime("%d/%m/%Y") }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

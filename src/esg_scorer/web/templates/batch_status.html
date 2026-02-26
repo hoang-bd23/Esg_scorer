@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="glass-panel rounded-2xl p-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">Trạng thái Quét Hàng Loạt</h1>
+        <p class="text-slate-500 mb-8">Hệ thống đang chạy nền xử lý toàn bộ báo cáo trong folder bạn tải lên.</p>
+
+        <div class="relative pt-1 w-full flex-col flex items-center mb-6">
+            <div class="flex mb-2 items-center justify-between w-full max-w-sm">
+                <div>
+                    <span
+                        class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-emerald-600 bg-emerald-200"
+                        id="status-badge">
+                        Processing
+                    </span>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-bold inline-block text-emerald-600" id="progress-text">
+                        0 / 0 Files
+                    </span>
+                </div>
+            </div>
+            <div class="overflow-hidden h-3 mb-4 text-xs flex rounded bg-emerald-100 w-full max-w-sm">
+                <div id="progress-bar" style="width: 0%"
+                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500 transition-all duration-500">
+                </div>
+            </div>
+        </div>
+
+        <div id="completion-actions" class="hidden mt-8 space-y-3">
+            <p class="text-emerald-600 font-bold text-lg mb-4"><i class="fa-solid fa-circle-check mr-2"></i>Đã quét xong
+                toàn bộ dữ liệu!</p>
+            <a href="/"
+                class="inline-block bg-slate-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-800 transition-colors shadow-sm w-full max-w-xs">
+                Về Bảng Xếp Hạng
+            </a>
+            <!-- Có thể bổ sung nút Export Excel Batch ở đây tương tự CLI -->
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const jobId = "{{ job_id }}";
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const statusBadge = document.getElementById('status-badge');
+    const completionActions = document.getElementById('completion-actions');
+
+    function checkStatus() {
+        fetch(`/api/batch/${jobId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    statusBadge.innerText = "Error / Not Found";
+                    statusBadge.classList.replace('bg-emerald-200', 'bg-red-200');
+                    statusBadge.classList.replace('text-emerald-600', 'text-red-600');
+                    return;
+                }
+
+                const total = data.total_files;
+                const processed = data.processed_files;
+                const status = data.status;
+
+                progressText.innerText = `${processed} / ${total} Files`;
+                let percent = total > 0 ? (processed / total) * 100 : 0;
+                progressBar.style.width = `${percent}%`;
+
+                if (status === 'completed') {
+                    statusBadge.innerText = "Completed";
+                    progressBar.style.width = "100%";
+                    progressBar.classList.add('bg-green-600');
+                    completionActions.classList.remove('hidden');
+                } else if (status === 'error') {
+                    statusBadge.innerText = "Error";
+                    statusBadge.classList.replace('bg-emerald-200', 'bg-red-200');
+                    statusBadge.classList.replace('text-emerald-600', 'text-red-600');
+                    progressBar.classList.replace('bg-emerald-500', 'bg-red-500');
+                } else {
+                    // Tiếp tục poll sau 1 giây
+                    setTimeout(checkStatus, 1500);
+                }
+            })
+            .catch(err => {
+                console.error("Polling error", err);
+                setTimeout(checkStatus, 3000);
+            });
+    }
+
+    // Bắt đầu polling
+    setTimeout(checkStatus, 1000);
+</script>
+{% endblock %}
