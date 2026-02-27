@@ -22,7 +22,6 @@ KLD_KEYWORDS = {
     "ENV_CON_X": ["vấn đề môi trường khác", "ô nhiễm", "pollution"],
 
     # COMMUNITY STRENGTHS
-    "ENV_STR_A": ["từ thiện", "quyên góp", "charitable giving", "ủng hộ", "cứu trợ", "hiến máu"],
     "COM_STR_A": ["từ thiện", "quyên góp", "charitable giving", "tài trợ", "ủng hộ"],
     "COM_STR_B": ["giải pháp sáng tạo", "innovative giving", "cộng đồng thông minh"],
     "COM_STR_C": ["hỗ trợ nhà ở", "xây nhà tình nghĩa", "nhà ở xã hội", "support for housing"],
@@ -38,23 +37,23 @@ KLD_KEYWORDS = {
 
     # EMPLOYEE RELATIONS STRENGTHS
     "EMP_STR_A": ["công đoàn", "union relations", "ban chấp hành công đoàn"],
-    "EMP_STR_C": ["chia sẻ lợi nhuận", "thưởng cổ phiếu", "ESOP", "cash profit sharing"],
-    "EMP_STR_D": ["đào tạo nhân viên", "khuyến khích nhân viên", "employee involvement", "chương trình đào tạo"],
-    "EMP_STR_F": ["phúc lợi hưu trí", "lương hưu", "retirement benefits", "bảo hiểm hưu trí"],
+    "EMP_STR_C": ["chia sẻ lợi nhuận", "thưởng cổ phiếu", "ESOP", "cash profit sharing", "employee involvement"],
+    "EMP_STR_D": ["đào tạo nhân viên", "khuyến khích nhân viên", "chương trình đào tạo", "retirement benefits strength d"],
+    "EMP_STR_F": ["phúc lợi hưu trí", "lương hưu", "retirement benefits", "bảo hiểm hưu trí", "retirement benefits strength f"],
     "EMP_STR_G": ["an toàn lao động", "sức khỏe lao động", "health and safety", "khám sức khỏe định kỳ", "an toàn vệ sinh lao động"],
     "EMP_STR_X": ["phúc lợi khác", "other employee benefits", "chăm sóc nhân viên"],
 
     # EMPLOYEE RELATIONS CONCERNS
-    "EMP_CON_A": ["đình công", "bãi công", "tranh chấp lao động", "union relations concerns"],
-    "EMP_CON_B": ["tai nạn lao động", "bệnh nghề nghiệp", "health and safety concerns", "không an toàn lao động"],
-    "EMP_CON_C": ["cắt giảm nhân sự", "sa thải", "workforce reductions", "nghỉ việc hàng loạt", "giảm biên chế"],
-    "EMP_CON_D": ["cắt giảm lương hưu", "nợ bảo hiểm", "retirement benefits concern", "nợ BHXH"],
+    "EMP_CON_A": ["đình công", "bãi công", "tranh chấp lao động", "union relations concerns", "health and safety concerns a"],
+    "EMP_CON_B": ["tai nạn lao động", "bệnh nghề nghiệp", "không an toàn lao động", "health and safety concerns b"],
+    "EMP_CON_C": ["cắt giảm nhân sự", "sa thải", "workforce reductions", "nghỉ việc hàng loạt", "giảm biên chế", "retirement benefits concern c"],
+    "EMP_CON_D": ["cắt giảm lương hưu", "nợ bảo hiểm", "retirement benefits concern d", "nợ BHXH"],
     "EMP_CON_X": ["khiếu nại lao động", "employee concerns"],
 
     # DIVERSITY STRENGTHS
-    "DIV_STR_A": ["CEO nữ", "nữ tổng giám đốc", "phụ nữ lãnh đạo"],
-    "DIV_STR_B": ["thăng tiến công bằng", "cơ hội thăng tiến", "đề bạt lao động nữ"],
-    "DIV_STR_C": ["thành viên HĐQT nữ", "nữ hội đồng quản trị", "phụ nữ trong ban lãnh đạo"],
+    "DIV_STR_A": ["CEO nữ", "nữ tổng giám đốc", "phụ nữ lãnh đạo", "board of directors a"],
+    "DIV_STR_B": ["thăng tiến công bằng", "cơ hội thăng tiến", "đề bạt lao động nữ", "board of directors b"],
+    "DIV_STR_C": ["thành viên HĐQT nữ", "nữ hội đồng quản trị", "phụ nữ trong ban lãnh đạo", "board of directors c"],
     "DIV_STR_D": ["cân bằng công việc", "work-life balance", "chế độ thai sản", "làm việc linh hoạt"],
     "DIV_STR_E": ["hỗ trợ nhóm yếu thế", "ký kết với phụ nữ", "minority contracting"],
     "DIV_STR_F": ["lao động khuyết tật", "người khuyết tật", "employment of disabled"],
@@ -62,9 +61,9 @@ KLD_KEYWORDS = {
     "DIV_STR_X": ["bình đẳng giới", "đa dạng", "diversity", "hòa nhập", "tôn trọng sự khác biệt"],
 
     # DIVERSITY CONCERNS
-    "DIV_CON_A": ["phân biệt đối xử", "không bình đẳng", "non-representation", "bất bình đẳng giới"],
-    "DIV_CON_B": ["bê bối quấy rối", "kiện cáo phân biệt", "controversies diversity"],
-    "DIV_CON_X": ["vấn đề đa dạng khác", "thiếu hòa nhập"],
+    "DIV_CON_A": ["phân biệt đối xử", "không bình đẳng", "non-representation", "bất bình đẳng giới", "controversies"],
+    "DIV_CON_B": ["bê bối quấy rối", "kiện cáo phân biệt", "diversity other concerns b"],
+    "DIV_CON_X": ["vấn đề đa dạng khác", "thiếu hòa nhập", "diversity other concerns x"],
 
     # CORPORATE GOVERNANCE STRENGTHS
     "CGOV_STR_A": ["thù lao hợp lý", "limited compensation", "lương thưởng minh bạch"],
@@ -74,20 +73,20 @@ KLD_KEYWORDS = {
 
     # CORPORATE GOVERNANCE CONCERNS
     "CGOV_CON_B": ["thù lao quá cao", "high compensation", "lương lãnh đạo bất thường"],
-    "CGOV_CON_F": ["xung đột lợi ích", "sở hữu chéo", "ownership concern", "giao dịch bên liên quan bất thường"],
-    "CGOV_CON_G": ["sai sót kế toán", "kiểm toán ngoại trừ", "accounting concern", "không minh bạch tài chính"],
-    "CGOV_CON_H": ["vi phạm công bố thông tin", "chậm báo cáo", "transparency concern", "che giấu thông tin"],
-    "CGOV_CON_X": ["bê bối lãnh đạo", "lạm quyền", "tham nhũng", "bribery"],
+    "CGOV_CON_F": ["xung đột lợi ích", "sở hữu chéo", "accounting concern", "giao dịch bên liên quan bất thường"],
+    "CGOV_CON_G": ["sai sót kế toán", "kiểm toán ngoại trừ", "transparency concern", "không minh bạch tài chính"],
+    "CGOV_CON_H": ["vi phạm công bố thông tin", "chậm báo cáo", "cg other concerns h", "che giấu thông tin"],
+    "CGOV_CON_X": ["bê bối lãnh đạo", "lạm quyền", "tham nhũng", "bribery", "cg other concerns x"],
 
     # PRODUCT QUALITY STRENGTHS
-    "PRO_STR_A": ["chất lượng", "ISO 9001", "chứng nhận chất lượng", "quality assurance", "đảm bảo chất lượng"],
-    "PRO_STR_B": ["R&D", "đổi mới", "sáng tạo", "nghiên cứu và phát triển", "innovation", "bằng sáng chế"],
-    "PRO_STR_C": ["sản phẩm giá rẻ", "hỗ trợ người nghèo", "giá ưu đãi", "benefits to economically disadvantaged"],
-    "PRO_STR_X": ["giải thưởng sản phẩm", "sản phẩm tin dùng", "product award"],
+    "PRO_STR_A": ["chất lượng", "ISO 9001", "chứng nhận chất lượng", "quality assurance", "đảm bảo chất lượng", "R&D", "đổi mới", "sáng tạo", "nghiên cứu và phát triển", "innovation", "bằng sáng chế"],
+    "PRO_STR_B": ["sản phẩm giá rẻ", "hỗ trợ người nghèo", "giá ưu đãi", "benefits to economically disadvantaged b"],
+    "PRO_STR_C": ["giải thưởng sản phẩm", "sản phẩm tin dùng", "benefits to economically disadvantaged c"],
+    "PRO_STR_X": ["product other strengths"],
 
     # PRODUCT QUALITY CONCERNS
     "PRO_CON_A": ["sản phẩm thu hồi", "lỗi sản phẩm", "mất an toàn sản phẩm", "product safety", "thu hồi sản phẩm"],
-    "PRO_CON_D": ["quảng cáo sai sự thật", "lừa dối khách hàng", "marketing concern", "vi phạm hợp đồng"],
+    "PRO_CON_D": ["quảng cáo sai sự thật", "lừa dối khách hàng", "product other concerns d", "vi phạm hợp đồng"],
     "PRO_CON_E": ["chống độc quyền", "cạnh tranh không lành mạnh", "antitrust", "lũng đoạn"],
-    "PRO_CON_X": ["phàn nàn khách hàng", "khiếu nại sản phẩm", "tẩy chay"]
+    "PRO_CON_X": ["phàn nàn khách hàng", "khiếu nại sản phẩm", "tẩy chay", "product other concerns x"]
 }

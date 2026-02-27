@@ -16,7 +16,7 @@ class BatchScoringService:
         self.use_cache = use_cache
 
     @staticmethod
-    def _process_single_file(pdf_path: str, weights: ESGScoreWeights, use_cache: bool) -> Optional[CompanyESGResult]:
+    def _process_single_file(pdf_path: str, use_cache: bool) -> Optional[CompanyESGResult]:
         try:
             # Khởi tạo instance mỗi process
             extractor = PDFExtractor()
@@ -30,13 +30,12 @@ class BatchScoringService:
                 return None
                 
             result = engine.evaluate(company_name, 2024, text)
-            result.weights = weights
             return result
         except Exception as e:
             # Dấu lỗi ở CLI console nếu muốn
             return None
 
-    def process_folder(self, folder_path: str, weights: ESGScoreWeights, max_workers: int = 4) -> List[CompanyESGResult]:
+    def process_folder(self, folder_path: str, max_workers: int = 4) -> List[CompanyESGResult]:
         """Xử lý hàng loạt file PDF trong thư mục bằng đa luồng"""
         folder = Path(folder_path)
         if not folder.exists() or not folder.is_dir():
@@ -50,7 +49,7 @@ class BatchScoringService:
         # Tối ưu cho 700-800 files bằng ProcessPoolExecutor
         with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
             # Map kết quả
-            futures = {executor.submit(self._process_single_file, str(path), weights, self.use_cache): path for path in pdf_files}
+            futures = {executor.submit(self._process_single_file, str(path), self.use_cache): path for path in pdf_files}
             
             # Progress bar với tqdm
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(pdf_files), desc="Đang phân tích ESG"):

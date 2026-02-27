@@ -15,24 +15,12 @@ router = APIRouter(tags=["Scoring"])
 extractor = PDFExtractor()
 engine = RuleBasedScoringEngine(KLD_KEYWORDS)
 
-def parse_weights_api(weights_str: Optional[str]):
-    from ..models.schemas import ESGScoreWeights
-    if not weights_str: return ESGScoreWeights()
-    try:
-        parts = {p.split('=')[0].strip().upper(): float(p.split('=')[1]) for p in weights_str.split(',')}
-        return ESGScoreWeights(
-            e_weight=parts.get('E', 1.0),
-            s_weight=parts.get('S', 1.0),
-            g_weight=parts.get('G', 1.0)
-        )
-    except: return ESGScoreWeights()
 
 @router.post("/score", response_model=CompanyESGResult)
 async def score_company(
     file: UploadFile = File(..., description="File PDF báo cáo của doanh nghiệp"),
     company_name: str = Form(..., description="Tên doanh nghiệp"),
-    year: int = Form(2024, description="Năm báo cáo"),
-    weights: Optional[str] = Form(None, description="Trọng số. VD: 'E=0.4,S=0.3,G=0.3'")
+    year: int = Form(2024, description="Năm báo cáo")
 ):
     """
     Tải lên một file PDF và thực hiện chấm điểm ESG tự động.
@@ -47,9 +35,6 @@ async def score_company(
             temp_file.write(content)
             temp_path = temp_file.name
             
-        # Parse weights
-        parsed_weights = parse_weights_api(weights)
-        
         # Xử lý PDF
         text = extractor.extract_text(temp_path, use_cache=False) # API thường upload trực tiếp
         if not text:
@@ -57,8 +42,6 @@ async def score_company(
             
         # Chấm điểm
         result = engine.evaluate(company_name, year, text)
-        result.weights = parsed_weights
-        
         return result
         
     except Exception as e:

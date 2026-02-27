@@ -17,18 +17,15 @@
             <div class="flex gap-4">
                 <div class="text-center">
                     <p class="text-xs text-slate-500">Môi trường (E)</p>
-                    <p class="text-xl font-bold text-green-600">{{ "%.1f"|format(result.e_score *
-                        result.weights.e_weight) }}</p>
+                    <p class="text-xl font-bold text-green-600">{{ "%.1f"|format(result.e_score) }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-xs text-slate-500">Xã hội (S)</p>
-                    <p class="text-xl font-bold text-blue-600">{{ "%.1f"|format(result.s_score *
-                        result.weights.s_weight) }}</p>
+                    <p class="text-xl font-bold text-blue-600">{{ "%.1f"|format(result.s_score) }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-xs text-slate-500">Quản trị (G)</p>
-                    <p class="text-xl font-bold text-purple-600">{{ "%.1f"|format(result.g_score *
-                        result.weights.g_weight) }}</p>
+                    <p class="text-xl font-bold text-purple-600">{{ "%.1f"|format(result.g_score) }}</p>
                 </div>
             </div>
         </div>
@@ -80,6 +77,101 @@
         </div>
     </div>
 </div>
+
+<!-- Chi tiết bằng chứng -->
+<div class="glass-panel rounded-2xl p-6 mt-6">
+    <h3 class="text-xl font-bold text-slate-800 mb-6"><i class="fa-solid fa-magnifying-glass mr-2"></i>Bằng Chứng Trích
+        Xuất</h3>
+
+    {% set dims = [
+    ('Môi trường (E)', 'text-emerald-800 bg-emerald-100 border-emerald-200', ['Environment']),
+    ('Xã hội (S)', 'text-blue-800 bg-blue-100 border-blue-200', ['Community', 'Employee Relations', 'Diversity',
+    'Product Quality']),
+    ('Quản trị (G)', 'text-purple-800 bg-purple-100 border-purple-200', ['Corporate Governance'])
+    ] %}
+
+    <div class="space-y-8">
+        {% for dim_title, dim_class, comp_keys in dims %}
+        <div class="bg-white/50 rounded-xl p-5 border border-slate-100">
+            <h4 class="font-bold border {{ dim_class }} px-4 py-1.5 rounded-lg inline-flex items-center mb-5 shadow-sm">
+                {{ dim_title }}
+            </h4>
+
+            <div class="space-y-4">
+                {% set ns = namespace(has_evidence=false) %}
+                {% for key in comp_keys %}
+                {% set comp = result.components[key] %}
+                {% if comp %}
+                {% for item in comp.strengths.items %}
+                {% if item.score > 0 %}
+                {% set ns.has_evidence = true %}
+                <div
+                    class="p-4 bg-emerald-50 border border-emerald-100 rounded-xl shadow-sm hover:shadow transition-shadow">
+                    <div class="flex items-center gap-2 mb-2 flex-wrap">
+                        <span class="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded shadow-sm">{{
+                            item.id }}</span>
+                        <span class="font-semibold text-emerald-800">+1 điểm: {{ item.name }}</span>
+                    </div>
+                    {% if item.evidences %}
+                    <div class="space-y-3 mt-3">
+                        {% for ev in item.evidences %}
+                        <div class="bg-white p-3 rounded-lg border border-emerald-100 flex flex-col gap-2">
+                            <span
+                                class="inline-flex self-start items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                <i class="fa-regular fa-file-pdf mr-1"></i>Trang PDF: {{ ev.page_num }}
+                            </span>
+                            <div class="text-sm text-slate-700 italic">
+                                <i class="fa-solid fa-quote-left text-emerald-200 mr-2"></i>{{ ev.text }}<i
+                                    class="fa-solid fa-quote-right text-emerald-200 ml-2"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                {% for item in comp.concerns.items %}
+                {% if item.score > 0 %}
+                {% set ns.has_evidence = true %}
+                <div class="p-4 bg-red-50 border border-red-100 rounded-xl shadow-sm hover:shadow transition-shadow">
+                    <div class="flex items-center gap-2 mb-2 flex-wrap">
+                        <span class="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded shadow-sm">{{ item.id
+                            }}</span>
+                        <span class="font-semibold text-red-800">-1 điểm: {{ item.name }}</span>
+                    </div>
+                    {% if item.evidences %}
+                    <div class="space-y-3 mt-3">
+                        {% for ev in item.evidences %}
+                        <div class="bg-white p-3 rounded-lg border border-red-100 flex flex-col gap-2">
+                            <span
+                                class="inline-flex self-start items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                <i class="fa-regular fa-file-pdf mr-1"></i>Trang PDF: {{ ev.page_num }}
+                            </span>
+                            <div class="text-sm text-slate-700 italic">
+                                <i class="fa-solid fa-quote-left text-red-200 mr-2"></i>{{ ev.text }}<i
+                                    class="fa-solid fa-quote-right text-red-200 ml-2"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+
+                {% if not ns.has_evidence %}
+                <p class="text-sm text-slate-500 italic py-2">Không tìm thấy bằng chứng nào thuộc nhóm này.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -95,14 +187,14 @@
                     data: [
                         {{ result.e_score }},
                 {{ result.s_score }}, 
-                    {{ result.g_score }}
-                ],
+                        {{ result.g_score }}
+                    ],
         backgroundColor: 'rgba(16, 185, 129, 0.2)',
         borderColor: 'rgba(16, 185, 129, 1)',
         borderWidth: 2,
-        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-            }]
-        },
+        pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+                }]
+            },
         options: {
         scales: {
             r: {
@@ -113,7 +205,7 @@
         },
         plugins: { legend: { display: false } }
     }
+        });
     });
-});
 </script>
 {% endblock %}

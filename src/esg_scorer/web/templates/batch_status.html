@@ -26,6 +26,11 @@
                     class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500 transition-all duration-500">
                 </div>
             </div>
+
+            <div id="file-list-container"
+                class="mt-4 space-y-2 max-h-60 overflow-y-auto w-full max-w-sm text-left px-1">
+                <!-- Danh sách file sẽ được render qua JS -->
+            </div>
         </div>
 
         <div id="completion-actions" class="hidden mt-8 space-y-3">
@@ -35,7 +40,10 @@
                 class="inline-block bg-slate-900 text-white px-6 py-3 rounded-xl font-medium hover:bg-slate-800 transition-colors shadow-sm w-full max-w-xs">
                 Về Bảng Xếp Hạng
             </a>
-            <!-- Có thể bổ sung nút Export Excel Batch ở đây tương tự CLI -->
+            <a href="/batch-export/{{ job_id }}"
+                class="inline-block bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-sm w-full max-w-xs cursor-pointer">
+                <i class="fa-solid fa-file-excel mr-2"></i> Xuất File Excel Toàn Bộ
+            </a>
         </div>
 
     </div>
@@ -80,8 +88,39 @@
                     statusBadge.classList.replace('text-emerald-600', 'text-red-600');
                     progressBar.classList.replace('bg-emerald-500', 'bg-red-500');
                 } else {
-                    // Tiếp tục poll sau 1 giây
+                    // Tiếp tục poll sau 1.5 giây
                     setTimeout(checkStatus, 1500);
+                }
+
+                // Render file details
+                const fileDetails = data.file_details || {};
+                const container = document.getElementById('file-list-container');
+                if (container && Object.keys(fileDetails).length > 0) {
+                    container.innerHTML = '';
+                    for (const [filename, fileStatus] of Object.entries(fileDetails)) {
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-white p-3 py-2 rounded-xl border border-slate-200 shadow-sm";
+
+                        let icon = "<i class='fa-solid fa-hourglass-half text-slate-400'></i>";
+                        let fileStatusText = "<span class='text-slate-500 text-xs font-medium'>Đang xử lý/Đợi...</span>";
+
+                        if (fileStatus === 'completed') {
+                            icon = "<i class='fa-solid fa-check text-emerald-500'></i>";
+                            fileStatusText = "<span class='text-emerald-600 text-xs font-bold'>Đã xong</span>";
+                        } else if (fileStatus === 'error') {
+                            icon = "<i class='fa-solid fa-xmark text-red-500'></i>";
+                            fileStatusText = "<span class='text-red-500 text-xs font-bold'>Lỗi</span>";
+                        }
+
+                        div.innerHTML = `
+                            <div class="flex items-center space-x-3 overflow-hidden">
+                                <div class="w-5 text-center">${icon}</div>
+                                <span class="text-sm text-slate-700 font-medium truncate w-48" title="${filename}">${filename}</span>
+                            </div>
+                            <div class="ml-2 whitespace-nowrap">${fileStatusText}</div>
+                        `;
+                        container.appendChild(div);
+                    }
                 }
             })
             .catch(err => {

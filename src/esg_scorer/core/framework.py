@@ -44,25 +44,25 @@ COMMUNITY_CONCERNS = [
 
 EMPLOYEE_RELATIONS_STRENGTHS = [
     {"id": "EMP_STR_A", "name": "Union Relations"},
-    {"id": "EMP_STR_C", "name": "Cash Profit Sharing"},
-    {"id": "EMP_STR_D", "name": "Employee Involvement"},
-    {"id": "EMP_STR_F", "name": "Retirement Benefits Strength"},
+    {"id": "EMP_STR_C", "name": "Cash Profit Sharing / Employee Involvement"},
+    {"id": "EMP_STR_D", "name": "Retirement Benefits Strength D"},
+    {"id": "EMP_STR_F", "name": "Retirement Benefits Strength F"},
     {"id": "EMP_STR_G", "name": "Health and Safety Strength"},
-    {"id": "EMP_STR_X", "name": "Employee Strengths - Other"}
+    {"id": "EMP_STR_X", "name": "Employee Strengths Other"}
 ]
 
 EMPLOYEE_RELATIONS_CONCERNS = [
-    {"id": "EMP_CON_A", "name": "Union Relations"},
-    {"id": "EMP_CON_B", "name": "Health and Safety Concerns"},
-    {"id": "EMP_CON_C", "name": "Workforce Reductions"},
-    {"id": "EMP_CON_D", "name": "Retirement Benefits Concern"},
+    {"id": "EMP_CON_A", "name": "Health and Safety Concerns A"},
+    {"id": "EMP_CON_B", "name": "Health and Safety Concerns B"},
+    {"id": "EMP_CON_C", "name": "Retirement Benefits Concern C"},
+    {"id": "EMP_CON_D", "name": "Retirement Benefits Concern D"},
     {"id": "EMP_CON_X", "name": "Emp. Relations Other Concerns"}
 ]
 
 DIVERSITY_STRENGTHS = [
-    {"id": "DIV_STR_A", "name": "CEO"},
-    {"id": "DIV_STR_B", "name": "Promotion"},
-    {"id": "DIV_STR_C", "name": "Board of Directors"},
+    {"id": "DIV_STR_A", "name": "Board of Directors A"},
+    {"id": "DIV_STR_B", "name": "Board of Directors B"},
+    {"id": "DIV_STR_C", "name": "Board of Directors C"},
     {"id": "DIV_STR_D", "name": "Work-Life Benefits"},
     {"id": "DIV_STR_E", "name": "Women and Minority Contracting"},
     {"id": "DIV_STR_F", "name": "Employment of the Disabled"},
@@ -71,9 +71,9 @@ DIVERSITY_STRENGTHS = [
 ]
 
 DIVERSITY_CONCERNS = [
-    {"id": "DIV_CON_A", "name": "Non-Representation"},
-    {"id": "DIV_CON_B", "name": "Controversies"},
-    {"id": "DIV_CON_X", "name": "Diversity Other Concerns"}
+    {"id": "DIV_CON_A", "name": "Controversies"},
+    {"id": "DIV_CON_B", "name": "Diversity Other Concerns B"},
+    {"id": "DIV_CON_X", "name": "Diversity Other Concerns X"}
 ]
 
 CORPORATE_GOVERNANCE_STRENGTHS = [
@@ -85,24 +85,24 @@ CORPORATE_GOVERNANCE_STRENGTHS = [
 
 CORPORATE_GOVERNANCE_CONCERNS = [
     {"id": "CGOV_CON_B", "name": "High Compensation"},
-    {"id": "CGOV_CON_F", "name": "Ownership Concern"},
-    {"id": "CGOV_CON_G", "name": "Accounting Concern"},
-    {"id": "CGOV_CON_H", "name": "Transparency Concern"},
-    {"id": "CGOV_CON_X", "name": "CG Other Concerns"}
+    {"id": "CGOV_CON_F", "name": "Accounting Concern"},
+    {"id": "CGOV_CON_G", "name": "Transparency Concern"},
+    {"id": "CGOV_CON_H", "name": "CG Other Concerns H"},
+    {"id": "CGOV_CON_X", "name": "CG Other Concerns X"}
 ]
 
 PRODUCT_QUALITY_STRENGTHS = [
-    {"id": "PRO_STR_A", "name": "Quality"},
-    {"id": "PRO_STR_B", "name": "R+D - Innovation"},
-    {"id": "PRO_STR_C", "name": "Benefits to Economically Disadvantaged"},
+    {"id": "PRO_STR_A", "name": "Quality / R+D-Innovation"},
+    {"id": "PRO_STR_B", "name": "Benefits to Economically Disadvantaged B"},
+    {"id": "PRO_STR_C", "name": "Benefits to Economically Disadvantaged C"},
     {"id": "PRO_STR_X", "name": "Product Other Strengths"}
 ]
 
 PRODUCT_QUALITY_CONCERNS = [
     {"id": "PRO_CON_A", "name": "Product Safety"},
-    {"id": "PRO_CON_D", "name": "Marketing - Contracting Concern"},
-    {"id": "PRO_CON_E", "name": "Antitrust"},
-    {"id": "PRO_CON_X", "name": "Product Other Concerns"}
+    {"id": "PRO_CON_D", "name": "Product Other Concerns D"},
+    {"id": "PRO_CON_E", "name": "Product Other Concerns E"},
+    {"id": "PRO_CON_X", "name": "Product Other Concerns X"}
 ]
 
 def initialize_empty_company_result() -> Dict[str, ComponentScore]:

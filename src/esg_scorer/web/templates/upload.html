@@ -68,19 +68,10 @@
                             class="mt-1 w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 px-3 py-2 border text-sm"
                             placeholder="VD: Vinamilk">
                     </div>
-                    <!-- Year, Weights gộp cho gọn -->
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label for="year" class="block text-sm font-medium text-slate-700">Năm báo cáo</label>
-                            <input type="number" name="year" id="year" value="2024" required
-                                class="mt-1 w-full rounded-lg border-slate-300 focus:border-emerald-500 px-3 py-2 border text-sm">
-                        </div>
-                        <div>
-                            <label for="weights" class="block text-sm font-medium text-slate-700">Trọng số E/S/G</label>
-                            <input type="text" name="weights" id="weights"
-                                class="mt-1 w-full rounded-lg border-slate-300 focus:border-emerald-500 px-3 py-2 border text-sm"
-                                placeholder="Mặc định 1.0">
-                        </div>
+                    <div>
+                        <label for="year" class="block text-sm font-medium text-slate-700">Năm báo cáo</label>
+                        <input type="number" name="year" id="year" value="2024" required
+                            class="mt-1 w-full rounded-lg border-slate-300 focus:border-emerald-500 px-3 py-2 border text-sm">
                     </div>
                 </div>
 
@@ -103,35 +94,57 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Thư mục chứa PDFs (<span
                             class="text-emerald-500">*</span>)</label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-colors group cursor-pointer"
-                        onclick="document.getElementById('folder-upload').click()">
-                        <div class="space-y-1 text-center">
+                    <label for="folder-upload"
+                        class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-colors group cursor-pointer w-full text-center">
+                        <div class="space-y-1">
                             <i
                                 class="fa-solid fa-folder-open text-4xl text-slate-400 group-hover:text-emerald-500 mb-3 transition-colors"></i>
                             <div class="flex text-sm text-slate-600 justify-center">
-                                <label for="folder-upload"
-                                    class="relative cursor-pointer rounded-md bg-transparent font-medium text-emerald-600 focus-within:outline-none hover:text-emerald-500">
-                                    <span>Chọn thư mục</span>
-                                    <input id="folder-upload" name="files" type="file" webkitdirectory directory
-                                        multiple class="sr-only" required
-                                        onchange="document.getElementById('folder-display').innerText = `Đã chọn ${this.files.length} files`">
-                                </label>
+                                <span class="relative font-medium text-emerald-600 hover:text-emerald-500">
+                                    Chọn thư mục
+                                </span>
+                                <input id="folder-upload" name="files" type="file" webkitdirectory directory multiple
+                                    class="sr-only" required onchange="
+                                        const fileList = Array.from(this.files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+                                        const count = fileList.length;
+                                        document.getElementById('folder-display-count').innerText = `Đã chọn ${count} file PDF`;
+                                        const listContainer = document.getElementById('selected-files-list');
+                                        listContainer.innerHTML = '';
+                                        if (count > 0) {
+                                            listContainer.classList.remove('hidden');
+                                            fileList.slice(0, 5).forEach(f => {
+                                                const li = document.createElement('li');
+                                                li.className = 'text-xs text-slate-600 text-left truncate';
+                                                li.innerHTML = `<i class='fa-solid fa-file-pdf text-red-400 mr-1'></i> ${f.name}`;
+                                                listContainer.appendChild(li);
+                                            });
+                                            if (count > 5) {
+                                                const li = document.createElement('li');
+                                                li.className = 'text-xs text-slate-500 text-center italic mt-1';
+                                                li.innerText = `... và ${count - 5} file khác`;
+                                                listContainer.appendChild(li);
+                                            }
+                                        } else {
+                                            listContainer.classList.add('hidden');
+                                        }
+                                    ">
                             </div>
-                            <p class="text-xs text-slate-500" id="folder-display">Chrome/Edge: Sẽ upload toàn bộ file
-                                bên trong.</p>
+                            <p class="text-xs text-slate-500 font-bold text-emerald-600" id="folder-display-count">Chưa
+                                có folder nào được chọn</p>
+                            <p class="text-xs text-slate-400">Chrome/Edge: Sẽ upload toàn bộ file PDF bên trong.</p>
+
+                            <!-- Danh sách file preview -->
+                            <ul id="selected-files-list"
+                                class="hidden mt-3 max-h-32 overflow-y-auto w-full bg-slate-50 rounded-lg p-2 border border-slate-200">
+                            </ul>
                         </div>
-                    </div>
+                    </label>
                 </div>
 
-                <!-- Custom Weights cho cả thư mục -->
+                <!-- Chú thích quy tắc -->
                 <div>
-                    <label for="batch_weights" class="block text-sm font-medium text-slate-700">Trọng số cho cả lô (Tùy
-                        chọn)</label>
-                    <input type="text" name="weights" id="batch_weights"
-                        class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 px-4 py-2 border text-sm"
-                        placeholder="VD: E=0.4, S=0.3, G=0.3">
-                    <p class="text-xs text-slate-500 mt-1">Tên công ty sẽ tự động lấy theo tên file (VD: Vinamilk.pdf ->
-                        Vinamilk).</p>
+                    <p class="text-xs text-slate-500 mt-1">Hệ thống sẽ dùng mặc nhiên Công thức Net Score KLD (1 biến có
+                        = 1 điểm). Tên công ty sẽ tự động lấy theo tên file (VD: Vinamilk.pdf -> Vinamilk).</p>
                 </div>
 
                 <button type="submit"
@@ -181,7 +194,7 @@
                     "Đang nhận diện nội dung báo cáo PDF...",
                     "Hệ thống đang trích xuất văn bản (Text Extraction)...",
                     "Đang khớp từ khóa và đánh giá các tiêu chí E, S, G...",
-                    "Đang tính lưới điểm (Net Score) và gán trọng số...",
+                    "Đang tính toán tổng điểm Lợi thế và Rủi ro (Net Score)...",
                     "Đang tạo biểu đồ phân tích...",
                     "Sắp xong rồi, vui lòng đợi thêm chút..."
                 ];

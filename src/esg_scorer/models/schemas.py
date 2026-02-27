@@ -27,12 +27,16 @@ class ComponentType(str, Enum):
         }
         return mapping[self]
 
+class EvidenceItem(BaseModel):
+    page_num: int = Field(description="Trang chứa bằng chứng")
+    text: str = Field(description="Đoạn văn bản trích xuất (ngữ cảnh)")
+
 class ScoreItem(BaseModel):
     id: str = Field(description="Mã định danh (VD: ENV_STR_A)")
     name: str = Field(description="Tên tiêu chí phụ")
     description: str = Field(default="", description="Mô tả tiêu chí")
     score: int = Field(default=0, ge=0, le=1, description="Điểm: 1 (có), 0 (không)")
-    evidence: Optional[str] = Field(default=None, description="Bằng chứng text hoặc đoạn văn bản hỗ trợ")
+    evidences: List[EvidenceItem] = Field(default_factory=list, description="Danh sách các bằng chứng tìm được")
 
 class CategoryScore(BaseModel):
     items: List[ScoreItem] = Field(default_factory=list)
@@ -59,7 +63,6 @@ class CompanyESGResult(BaseModel):
     company_name: str
     year: int
     components: Dict[str, ComponentScore] = Field(description="Điểm các thành phần (Environment, Community, etc.)")
-    weights: ESGScoreWeights = Field(default_factory=ESGScoreWeights)
     
     @property
     def e_score(self) -> float:
@@ -81,9 +84,6 @@ class CompanyESGResult(BaseModel):
 
     @property
     def total_esg_score(self) -> float:
-        # Tổng điểm ESG sử dụng trọng số
-        return (
-            self.e_score * self.weights.e_weight +
-            self.s_score * self.weights.s_weight +
-            self.g_score * self.weights.g_weight
-        )
+        # Tổng điểm ESG ròng theo chuẩn KLD = E_net + S_net + G_net
+        # Bằng chính là: Tổng điểm Strength (toàn bộ) - Tổng điểm Concern (toàn bộ)
+        return self.e_score + self.s_score + self.g_score

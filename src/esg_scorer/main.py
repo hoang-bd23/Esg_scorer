@@ -61,14 +61,13 @@ async def score_company_html(
     request: Request,
     file: UploadFile = File(..., description="File PDF báo cáo của doanh nghiệp"),
     company_name: str = Form(..., description="Tên doanh nghiệp"),
-    year: int = Form(2024, description="Năm báo cáo"),
-    weights: str = Form(None, description="Trọng số. VD: 'E=0.4,S=0.3,G=0.3'")
+    year: int = Form(2024, description="Năm báo cáo")
 ):
     from .api.routes import score_company
     from .models.database import get_db, DBCompanyResult
     try:
         # Tái sử dụng JSON endpoint nhưng render qua HTML
-        result = await score_company(file, company_name, year, weights)
+        result = await score_company(file, company_name, year)
         
         # Lưu vào Database
         db_generator = get_db()
@@ -77,9 +76,9 @@ async def score_company_html(
             db_record = DBCompanyResult(
                 company_name=result.company_name,
                 year=result.year,
-                e_score=result.e_score * result.weights.e_weight,
-                s_score=result.s_score * result.weights.s_weight,
-                g_score=result.g_score * result.weights.g_weight,
+                e_score=result.e_score,
+                s_score=result.s_score,
+                g_score=result.g_score,
                 total_esg_score=result.total_esg_score,
                 details=result.model_dump_json()  # Lưu JSON chi tiết
             )

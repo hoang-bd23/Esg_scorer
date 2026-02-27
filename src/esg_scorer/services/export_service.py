@@ -14,7 +14,7 @@ class ExcelExporter:
         
         # Headers
         headers = [
-            "Công ty", "Năm", "Total ESG Score", "Trọng số E", "Trọng số S", "Trọng số G",
+            "Công ty", "Năm", "Total ESG Score",
              "E Score", "S Score", "G Score",
              "ENV Net", "COM Net", "EMP Net", "DIV Net", "CGOV Net", "PRO Net",
              "ENV Str", "ENV Con", "COM Str", "COM Con", "EMP Str", "EMP Con",
@@ -31,12 +31,10 @@ class ExcelExporter:
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal="center")
             
-        # Dữ liệu
         for row, r in enumerate(results, 2):
             comps = r.components
             ws.append([
                 r.company_name, r.year, round(r.total_esg_score, 2),
-                r.weights.e_weight, r.weights.s_weight, r.weights.g_weight,
                 r.e_score, r.s_score, r.g_score,
                 # Net scores
                 comps["Environment"].net_score, comps["Community"].net_score, 
@@ -66,8 +64,8 @@ class ExcelExporter:
             
         # Tạo sheet chi tiết bằng chứng (Evidence)
         ws_details = wb.create_sheet(title="Evidences")
-        ws_details.append(["Công ty", "Thành phần", "Tiêu chí", "ID", "Điểm", "Bằng chứng trích xuất"])
-        for col in range(1, 7):
+        ws_details.append(["Công ty", "Thành phần", "Tiêu chí", "ID", "Điểm", "Trang PDF", "Bằng chứng trích xuất"])
+        for col in range(1, 8):
             ws_details.cell(row=1, column=col).font = header_font
             ws_details.cell(row=1, column=col).fill = header_fill
             
@@ -76,13 +74,21 @@ class ExcelExporter:
             for comp in r.components.values():
                 for item in comp.strengths.items + comp.concerns.items:
                     if item.score > 0:
-                        ws_details.append([
-                            r.company_name, comp.name.value, item.name, item.id, item.score, item.evidence or ""
-                        ])
-                        detail_row += 1
+                        if item.evidences:
+                            for ev in item.evidences:
+                                ws_details.append([
+                                    r.company_name, comp.name.value, item.name, item.id, item.score, ev.page_num, ev.text
+                                ])
+                                detail_row += 1
+                        else:
+                            ws_details.append([
+                                r.company_name, comp.name.value, item.name, item.id, item.score, "", ""
+                            ])
+                            detail_row += 1
                         
         ws_details.column_dimensions["A"].width = 20
-        ws_details.column_dimensions["F"].width = 80
+        ws_details.column_dimensions["F"].width = 15
+        ws_details.column_dimensions["G"].width = 80
         
         # Lưu file
         os_path = Path(output_path)

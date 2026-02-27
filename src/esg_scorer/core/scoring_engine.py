@@ -1,6 +1,6 @@
 import re
-from typing import Dict, List, Optional
-from ..models.schemas import CompanyESGResult, ComponentScore, ComponentType
+from typing import Dict, List, Optional, Any
+from ..models.schemas import CompanyESGResult, ComponentScore, ComponentType, EvidenceItem
 from .framework import initialize_empty_company_result
 
 class KeywordMatcher:
@@ -39,8 +39,8 @@ class RuleBasedScoringEngine:
             for criterion_id, keywords in keyword_dict.items()
         }
 
-    def evaluate(self, company_name: str, year: int, pdf_text: str) -> CompanyESGResult:
-        """Thực thi chấm điểm trên văn bản cho một công ty"""
+    def evaluate(self, company_name: str, year: int, pdf_pages: List[Dict[str, Any]]) -> CompanyESGResult:
+        """Thực thi chấm điểm trên danh sách trang (từ file PDF) cho một công ty"""
         
         result = CompanyESGResult(
             company_name=company_name,
@@ -51,24 +51,45 @@ class RuleBasedScoringEngine:
         # Lowercase một lần để tăng tốc tìm kiếm nếu không dùng regex
         # Nhưng ở đây Regex IgnoreCase sẽ lo. Nên để nguyên text gốc để extract context tốt.
         
-        # Duyệt qua từng Component (Environment, Social...), từng Category (Stength, Concern), từng Item
         for comp_name, comp_score in result.components.items():
             # Đánh giá Strengths
             for item in comp_score.strengths.items:
                 pattern = self.patterns.get(item.id)
                 if pattern:
-                    matches = list(pattern.finditer(pdf_text))
-                    if matches:
+                    found_evidences = []
+                    for page in pdf_pages:
+                        page_text = page.get("text", "")
+                        matches = list(pattern.finditer(page_text))
+                        if matches:
+                            ext_context = KeywordMatcher._extract_context(page_text, iter(matches))
+                            if ext_context:
+                                found_evidences.append(EvidenceItem(
+                                    page_num=page.get("page_num"),
+                                    text=ext_context
+                                ))
+                            
+                    if found_evidences:
                         item.score = 1
-                        item.evidence = KeywordMatcher._extract_context(pdf_text, iter(matches))
+                        item.evidences = found_evidences
                         
             # Đánh giá Concerns
             for item in comp_score.concerns.items:
                 pattern = self.patterns.get(item.id)
                 if pattern:
-                    matches = list(pattern.finditer(pdf_text))
-                    if matches:
+                    found_evidences = []
+                    for page in pdf_pages:
+                        page_text = page.get("text", "")
+                        matches = list(pattern.finditer(page_text))
+                        if matches:
+                            ext_context = KeywordMatcher._extract_context(page_text, iter(matches))
+                            if ext_context:
+                                found_evidences.append(EvidenceItem(
+                                    page_num=page.get("page_num"),
+                                    text=ext_context
+                                ))
+                            
+                    if found_evidences:
                         item.score = 1
-                        item.evidence = KeywordMatcher._extract_context(pdf_text, iter(matches))
+                        item.evidences = found_evidences
                         
         return result
