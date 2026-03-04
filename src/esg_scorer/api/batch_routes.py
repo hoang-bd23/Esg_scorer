@@ -86,9 +86,12 @@ def background_batch_process(job_id: str, folder_path: str):
             job.status = "error"
             db.commit()
     finally:
-        # Xóa thư mục tạm
-        if os.path.exists(folder_path):
-            shutil.rmtree(folder_path)
+        # Xóa thư mục tạm (bỏ qua lỗi nếu file đang bị khóa trên Windows)
+        try:
+            if os.path.exists(folder_path):
+                shutil.rmtree(folder_path, ignore_errors=True)
+        except Exception:
+            pass
         db.close()
 
 @router.post("/batch-upload", response_class=HTMLResponse)
