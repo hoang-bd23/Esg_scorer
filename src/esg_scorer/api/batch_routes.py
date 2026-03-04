@@ -40,7 +40,7 @@ def background_batch_process(job_id: str, folder_path: str):
         service = BatchScoringService(use_cache=False)
         pdf_files = list(job_dir.glob("*.pdf"))
         
-        with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             future_to_filename = {}
             for p in pdf_files:
                 future = executor.submit(BatchScoringService._process_single_file, str(p), False)

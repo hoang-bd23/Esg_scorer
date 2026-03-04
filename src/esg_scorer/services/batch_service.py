@@ -47,7 +47,7 @@ class BatchScoringService:
             
         results = []
         # Tối ưu cho 700-800 files bằng ProcessPoolExecutor
-        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Map kết quả
             futures = {executor.submit(self._process_single_file, str(path), self.use_cache): path for path in pdf_files}
             
