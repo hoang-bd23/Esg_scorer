@@ -1,3 +1,6 @@
+import os
+import logging
+from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from .api.routes import router as esg_router
@@ -5,6 +8,12 @@ from .api.batch_routes import router as batch_router
 
 from .models.database import init_db
 from contextlib import asynccontextmanager
+
+logger = logging.getLogger(__name__)
+
+# Đường dẫn tuyệt đối tới thư mục templates (không phụ thuộc CWD)
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATES_DIR = str(BASE_DIR / "web" / "templates")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,7 +45,7 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
-templates = Jinja2Templates(directory="src/esg_scorer/web/templates")
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 @app.get("/upload", response_class=HTMLResponse)
 async def upload_page(request: Request):
@@ -66,8 +75,10 @@ async def score_company_html(
     from .api.routes import score_company
     from .models.database import get_db, DBCompanyResult
     try:
+        logger.info(f"Bắt đầu xử lý file: {file.filename} cho {company_name}")
         # Tái sử dụng JSON endpoint nhưng render qua HTML
         result = await score_company(file, company_name, year)
+        logger.info(f"Xử lý xong: {company_name}, điểm ESG: {result.total_esg_score}")
         
         # Lưu vào Database
         db_generator = get_db()
@@ -80,9 +91,8 @@ async def score_company_html(
                 s_score=result.s_score,
                 g_score=result.g_score,
                 total_esg_score=result.total_esg_score,
-                details=result.model_dump_json()  # Lưu JSON chi tiết
+                details=result.model_dump_json()
             )
-            # Điền thêm net_score của 6 thành phần
             db.add(db_record)
             db.commit()
             db.refresh(db_record)
@@ -91,6 +101,7 @@ async def score_company_html(
 
         return templates.TemplateResponse("result.html", {"request": request, "result": result})
     except Exception as e:
+        logger.error(f"Lỗi khi xử lý {file.filename}: {e}", exc_info=True)
         return HTMLResponse(content=f"<h3>Lỗi: {e}</h3>", status_code=500)
 
 @app.get("/result/{result_id}", response_class=HTMLResponse)

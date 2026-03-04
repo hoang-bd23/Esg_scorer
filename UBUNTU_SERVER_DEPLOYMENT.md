@@ -416,12 +416,84 @@ https://esg.buiduchoang.dev
 
 ## Phần E: Bảo trì & Khắc phục sự cố
 
-### Cập nhật code mới
+### Cập nhật code khi có thay đổi
+
+#### Cách 1: Lệnh nhanh (Chỉ thay đổi code, không đổi thư viện)
+
+SSH vào server và chạy:
+
+```bash
+cd /var/www/Esg_scorer && git pull origin main && sudo systemctl restart esg_scorer
+```
+
+Nếu dùng **Cloudflare Tunnel**, restart thêm:
+
+```bash
+cd /var/www/Esg_scorer && git pull origin main && sudo systemctl restart esg_scorer cloudflared
+```
+
+#### Cách 2: Cập nhật có thêm thư viện mới (requirements thay đổi)
 
 ```bash
 cd /var/www/Esg_scorer
 git pull origin main
+source venv/bin/activate
+pip install -e .                    # Cài lại toàn bộ dependencies
+deactivate
 sudo systemctl restart esg_scorer
+```
+
+#### Cách 3: Script tự động từ máy Windows (Khuyến nghị — 1 click deploy)
+
+Tạo file `deploy.ps1` ở thư mục project trên máy Windows:
+
+```powershell
+# deploy.ps1 - Deploy ESG Scorer lên Ubuntu Server
+$SERVER = "bdhzxc23@192.168.1.124"      # ← Thay IP server thực tế
+$REMOTE_PATH = "/var/www/Esg_scorer"
+
+Write-Host "`n📦 Committing changes..." -ForegroundColor Cyan
+git add .
+$commitMsg = Read-Host "Nhập mô tả thay đổi (hoặc Enter để dùng mặc định)"
+if ([string]::IsNullOrWhiteSpace($commitMsg)) {
+    $commitMsg = "update: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
+}
+git commit -m $commitMsg
+git push origin main
+
+Write-Host "`n🚀 Updating server..." -ForegroundColor Cyan
+ssh $SERVER "cd $REMOTE_PATH && git pull origin main && sudo systemctl restart esg_scorer"
+
+Write-Host "`n✅ Deploy thành công!" -ForegroundColor Green
+Write-Host "🌐 Truy cập: http://192.168.1.124`n" -ForegroundColor Yellow
+```
+
+Mỗi lần muốn deploy, chỉ cần chạy:
+
+```powershell
+.\deploy.ps1
+```
+
+> [!TIP]
+> **Khi nào cần restart service?**
+> - ✅ Thay đổi code Python (`.py`) → **Cần restart** `esg_scorer`
+> - ✅ Thay đổi template HTML → **Cần restart** `esg_scorer`
+> - ✅ Thay đổi Nginx config → **Cần restart** `nginx`
+> - ❌ Thay đổi file static (CSS, JS, ảnh) → **Không cần restart** (tự cập nhật)
+
+#### Xác nhận cập nhật thành công
+
+Sau khi deploy, kiểm tra nhanh trên server:
+
+```bash
+# Kiểm tra service đang chạy
+sudo systemctl status esg_scorer
+
+# Kiểm tra web trả về 200 OK
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8000
+
+# Xem log nếu có lỗi
+sudo journalctl -u esg_scorer -n 20 --no-pager
 ```
 
 ### Xem log khi có lỗi

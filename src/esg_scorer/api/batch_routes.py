@@ -1,6 +1,7 @@
 import os
 import uuid
 import shutil
+import logging
 from pathlib import Path
 from fastapi import APIRouter, File, UploadFile, Form, BackgroundTasks, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
@@ -11,11 +12,18 @@ import json
 import concurrent.futures
 from ..models.database import get_db, DBBatchJob, DBCompanyResult
 from ..services.batch_service import BatchScoringService
-router = APIRouter(tags=["Batch"])
-templates = Jinja2Templates(directory="src/esg_scorer/web/templates")
 
-# Thư mục tạm lưu file upload
-UPLOAD_DIR = Path("batch_uploads")
+logger = logging.getLogger(__name__)
+
+router = APIRouter(tags=["Batch"])
+
+# Đường dẫn tuyệt đối tới templates (không phụ thuộc CWD)
+_BASE_DIR = Path(__file__).resolve().parent.parent
+templates = Jinja2Templates(directory=str(_BASE_DIR / "web" / "templates"))
+
+# Thư mục tạm lưu file upload (dùng đường dẫn tuyệt đối)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+UPLOAD_DIR = _PROJECT_ROOT / "batch_uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 def update_progress(job_dir: Path, filename: str, status: str):
@@ -39,6 +47,7 @@ def background_batch_process(job_id: str, folder_path: str):
     try:
         service = BatchScoringService(use_cache=False)
         pdf_files = list(job_dir.glob("*.pdf"))
+        logger.info(f"[Batch {job_id}] Bắt đầu xử lý {len(pdf_files)} file PDF")
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             future_to_filename = {}
@@ -63,10 +72,13 @@ def background_batch_process(job_id: str, folder_path: str):
                         )
                         db.add(db_record)
                         update_progress(job_dir, filename, "completed")
+                        logger.info(f"[Batch {job_id}] ✓ {filename}")
                     else:
                         update_progress(job_dir, filename, "error")
+                        logger.warning(f"[Batch {job_id}] ✗ {filename} - không trích xuất được")
                 except Exception as e:
                     update_progress(job_dir, filename, "error")
+                    logger.error(f"[Batch {job_id}] ✗ {filename} - lỗi: {e}")
                     
                 # Cập nhật số lượng file đã xử lý ngay khi xong
                 job = db.query(DBBatchJob).filter(DBBatchJob.id == job_id).first()
@@ -79,14 +91,15 @@ def background_batch_process(job_id: str, folder_path: str):
         if job:
             job.status = "completed"
             db.commit()
+        logger.info(f"[Batch {job_id}] Hoàn tất!")
             
     except Exception as e:
+        logger.error(f"[Batch {job_id}] Lỗi nghiêm trọng: {e}", exc_info=True)
         job = db.query(DBBatchJob).filter(DBBatchJob.id == job_id).first()
         if job:
             job.status = "error"
             db.commit()
     finally:
-        # Xóa thư mục tạm (bỏ qua lỗi nếu file đang bị khóa trên Windows)
         try:
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path, ignore_errors=True)
@@ -194,7 +207,7 @@ async def export_batch_results(job_id: str):
         if not results:
             raise HTTPException(status_code=400, detail="Failed to parse results data")
             
-        export_dir = Path("exports")
+        export_dir = _PROJECT_ROOT / "exports"
         export_dir.mkdir(exist_ok=True)
         file_path = export_dir / f"batch_export_{job_id}.xlsx"
         

@@ -5,8 +5,13 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 import pdfplumber
 
+# Thư mục gốc project (lên 3 cấp từ core/)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+
 class PDFExtractor:
-    def __init__(self, cache_dir: str = "data/cache"):
+    def __init__(self, cache_dir: str = None):
+        if cache_dir is None:
+            cache_dir = str(_PROJECT_ROOT / "data" / "cache")
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
     

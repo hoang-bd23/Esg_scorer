@@ -1,11 +1,15 @@
 from datetime import datetime
+from pathlib import Path
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from sqlalchemy.orm import declarative_base
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./esg_database.db"
+# Đường dẫn tuyệt đối tới DB (không phụ thuộc CWD)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+_DB_PATH = _PROJECT_ROOT / "esg_database.db"
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{_DB_PATH}"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
