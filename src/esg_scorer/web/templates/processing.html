@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto mt-10">
+    <div class="glass-panel rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+        <!-- Animation Spinner -->
+        <div class="relative w-24 h-24 mb-6">
+            <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin">
+            </div>
+            <i
+                class="fa-solid fa-leaf absolute inset-0 m-auto text-emerald-500 flex items-center justify-center text-2xl"></i>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-800 mb-3" id="status-title">Hệ thống đang phân tích dữ liệu...</h2>
+
+        <p class="text-slate-500 mb-6" id="status-desc">
+            Vui lòng không đóng trình duyệt.<br>
+            Quá trình trích xuất văn bản và chấm điểm ESG có thể mất từ 1 đến 2 phút tùy dung lượng file.
+        </p>
+
+        <!-- Dynamic Log Messages -->
+        <div
+            class="w-full bg-slate-50 rounded-lg p-4 border border-slate-200 text-left mb-6 max-h-32 overflow-hidden relative">
+            <div class="flex items-center text-sm font-medium text-slate-700 mb-2 border-b border-slate-200 pb-2">
+                <i class="fa-solid fa-terminal mr-2 text-slate-400"></i> Trạng thái hệ thống:
+            </div>
+            <p id="dynamic-log" class="text-emerald-600 text-sm font-mono animate-pulse">
+                > Đang khởi tạo mô hình trích xuất PDF...
+            </p>
+        </div>
+
+        <div id="error-container"
+            class="hidden w-full bg-red-50 text-red-600 p-4 rounded-lg border border-red-200 text-left mb-6">
+            <h4 class="font-bold flex items-center"><i class="fa-solid fa-circle-exclamation mr-2"></i> Đã xảy ra lỗi
+            </h4>
+            <p class="text-sm mt-1">Không thể phân tích tệp tin. Có thể file PDF bị mã hóa hoặc không chứa văn bản hợp
+                lệ.</p>
+            <a href="/upload"
+                class="mt-3 inline-block text-sm font-medium underline text-red-700 hover:text-red-800">Quay lại tải
+                file khác</a>
+        </div>
+
+        <!-- Hidden ID for JS -->
+        <input type="hidden" id="job-id" value="{{ job_id }}">
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const jobId = document.getElementById("job-id").value;
+        const dynamicLog = document.getElementById("dynamic-log");
+        const errorContainer = document.getElementById("error-container");
+        const statusTitle = document.getElementById("status-title");
+        const spinnerContainer = document.querySelector(".animate-spin");
+
+        // Mô phỏng log cho giống thật vì backend processing có thể lâu
+        const fakeLogs = [
+            "> Đang nhận diện nội dung báo cáo PDF...",
+            "> Đang trích xuất văn bản (Text Extraction)...",
+            "> Đang dọn dẹp dữ liệu rác...",
+            "> Đang khớp từ khóa tiêu chí Môi trường (E)...",
+            "> Đang khớp từ khóa tiêu chí Xã hội (S)...",
+            "> Đang khớp từ khóa tiêu chí Quản trị (G)...",
+            "> Đang tổng hợp lưới điểm rủi ro & cơ hội...",
+            "> Sắp hoàn thành, đang ghi vào cơ sở dữ liệu..."
+        ];
+
+        let logIndex = 0;
+        const logInterval = setInterval(() => {
+            logIndex = (logIndex + 1) % fakeLogs.length;
+            dynamicLog.innerText = fakeLogs[logIndex];
+        }, 12000); // 12 giây đổi dòng log 1 lần để user đỡ chán đợi 100s
+
+        // Polling logic
+        const pollInterval = setInterval(() => {
+            fetch(`/api/processing-status/${jobId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "completed" && data.result_id) {
+                        clearInterval(pollInterval);
+                        clearInterval(logInterval);
+                        statusTitle.innerText = "Xong! Đang chuyển hướng...";
+                        statusTitle.classList.replace("text-slate-800", "text-emerald-600");
+                        dynamicLog.innerText = "> Hoàn tất phân tích.";
+
+                        // Redirect sang trang kết quả
+                        setTimeout(() => {
+                            window.location.href = `/result/${data.result_id}`;
+                        }, 500);
+
+                    } else if (data.status === "error" || data.status === "not_found") {
+                        clearInterval(pollInterval);
+                        clearInterval(logInterval);
+                        spinnerContainer.classList.remove("animate-spin");
+                        spinnerContainer.classList.replace("border-emerald-500", "border-red-500");
+                        document.querySelector(".fa-leaf").classList.replace("text-emerald-500", "text-red-500");
+                        document.querySelector(".fa-leaf").classList.replace("fa-leaf", "fa-xmark");
+
+                        statusTitle.innerText = "Có lỗi xảy ra!";
+                        document.getElementById("status-desc").classList.add("hidden");
+                        dynamicLog.parentElement.classList.add("hidden");
+                        errorContainer.classList.remove("hidden");
+                    }
+                })
+                .catch(err => {
+                    console.error("Polling error:", err);
+                    // Bỏ qua lỗi mạng chập chờn, tiếp tục poll
+                });
+        }, 3000); // Check mỗi 3 giây
+    });
+</script>
+{% endblock %}

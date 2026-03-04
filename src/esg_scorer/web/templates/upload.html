@@ -21,9 +21,9 @@
                     <i
                         class="fa-solid fa-leaf absolute inset-0 m-auto text-emerald-500 flex items-center justify-center text-xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Đang phân tích dữ liệu</h3>
-                <p id="loading-text" class="text-sm text-slate-500 text-center animate-pulse">Đang tải file lên máy
-                    chủ...</p>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Đang tải tệp tin lên</h3>
+                <p id="loading-text" class="text-sm text-slate-500 text-center animate-pulse">Hệ thống đang tiếp nhận
+                    file PDF...</p>
             </div>
         </div>
 
@@ -188,15 +188,11 @@
                 // Hiển thị Overlay chặn tương tác
                 overlay.classList.remove('hidden');
 
-                // Các câu thông báo sẽ luân phiên hiện ra
+                // Các câu thông báo sẽ luân phiên hiện ra trong lúc đợi upload
                 const messages = [
-                    "Đang tải file lên máy chủ...",
-                    "Đang nhận diện nội dung báo cáo PDF...",
-                    "Hệ thống đang trích xuất văn bản (Text Extraction)...",
-                    "Đang khớp từ khóa và đánh giá các tiêu chí E, S, G...",
-                    "Đang tính toán tổng điểm Lợi thế và Rủi ro (Net Score)...",
-                    "Đang tạo biểu đồ phân tích...",
-                    "Sắp xong rồi, vui lòng đợi thêm chút..."
+                    "Đang truyền dữ liệu lên máy chủ...",
+                    "File lớn có thể mất vài giây để tải lên...",
+                    "Vui lòng đợi trong giây lát..."
                 ];
 
                 let i = 0;
@@ -207,7 +203,7 @@
                     } else {
                         clearInterval(interval);
                     }
-                }, 1500); // Đổi text sau mỗi 1.5 giây
+                }, 2000); // Đổi text sau mỗi 2 giây
             });
         }
     });
