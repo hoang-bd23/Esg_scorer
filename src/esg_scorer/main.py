@@ -124,30 +124,51 @@ def background_score_single(job_id: str, temp_path: str, company_name: str, year
         db.close()
 
 
-@app.post("/score-view", response_class=HTMLResponse)
-async def score_company_html(
-    request: Request,
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(..., description="File PDF báo cáo của doanh nghiệp"),
-    company_name: str = Form(..., description="Tên doanh nghiệp"),
-    year: int = Form(2024, description="Năm báo cáo")
+@app.post("/api/upload-chunk")
+async def upload_chunk(
+    chunk: UploadFile = File(...),
+    job_id: str = Form(...),
+    chunk_index: int = Form(...),
+    total_chunks: int = Form(...),
+    filename: str = Form(...)
 ):
-    from .models.database import get_db, DBBatchJob
+    """Nhận từng mảnh nhỏ (chunk) của file PDF và ghi tiếp vào file tạm."""
     try:
-        if not file.filename.endswith(".pdf"):
+        if not filename.endswith(".pdf"):
             return HTMLResponse(content="<h3>Chỉ chấp nhận file PDF</h3>", status_code=400)
             
-        job_id = str(uuid.uuid4())
-        safe_name = file.filename.replace("/", "_").replace("\\", "_")
+        safe_name = filename.replace("/", "_").replace("\\", "_")
         temp_path = SINGLE_UPLOAD_DIR / f"{job_id}_{safe_name}"
         
-        # Lưu file tải lên máy chủ trước
-        with open(temp_path, "wb") as f:
-            f.write(await file.read())
+        # Mở file mode 'ab' (append binary) để ghi tiếp mảnh mới vào khối cũ
+        with open(temp_path, "ab") as f:
+            f.write(await chunk.read())
             
-        logger.info(f"Đã lưu file {file.filename} -> {temp_path}, Job ID: {job_id}")
+        return {"status": "success", "chunk_index": chunk_index}
+    except Exception as e:
+        logger.error(f"Lỗi khi lưu chunk {chunk_index} của file {filename}: {e}", exc_info=True)
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/upload-complete")
+async def upload_complete(
+    background_tasks: BackgroundTasks,
+    job_id: str = Form(...),
+    filename: str = Form(...),
+    company_name: str = Form(...),
+    year: int = Form(2024)
+):
+    """Gói gọn quy trình: file đã gửi xong, bắt đầu Background Task để phân tích."""
+    from .models.database import get_db, DBBatchJob
+    try:
+        safe_name = filename.replace("/", "_").replace("\\", "_")
+        temp_path = SINGLE_UPLOAD_DIR / f"{job_id}_{safe_name}"
         
-        # Đăng ký job_id vào DB (Sử dụng tạm DBBatchJob để chứa state 1 file)
+        if not os.path.exists(temp_path):
+            return {"status": "error", "message": "Không tìm thấy file đã upload"}
+            
+        logger.info(f"Hoàn thành nhận Upload {filename} -> Job ID: {job_id}. Bắt đầu xử lý")
+        
+        # Đăng ký job_id vào DB
         db_generator = get_db()
         db = next(db_generator)
         try:
@@ -157,15 +178,15 @@ async def score_company_html(
         finally:
             db.close()
             
-        # Ném vào background processing (Không bắt Web chờ)
+        # Ném vào background processing
         background_tasks.add_task(background_score_single, job_id, str(temp_path), company_name, year)
         
-        # Chuyển tới màn hình Loading Polling UI
-        return RedirectResponse(url=f"/processing/{job_id}", status_code=303)
+        # Trả về mã OK cho Frontend biết để tự Redirect
+        return {"status": "success", "job_id": job_id}
         
     except Exception as e:
-        logger.error(f"Lỗi khi lưu file {file.filename}: {e}", exc_info=True)
-        return HTMLResponse(content=f"<h3>Lỗi: {e}</h3>", status_code=500)
+        logger.error(f"Lỗi khi hoàn tất luồng file {filename}: {e}", exc_info=True)
+        return {"status": "error", "message": str(e)}
 
 @app.get("/processing/{job_id}", response_class=HTMLResponse)
 async def processing_page(request: Request, job_id: str):

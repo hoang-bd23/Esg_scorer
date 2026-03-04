@@ -21,9 +21,15 @@
                     <i
                         class="fa-solid fa-leaf absolute inset-0 m-auto text-emerald-500 flex items-center justify-center text-xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Đang tải tệp tin lên</h3>
-                <p id="loading-text" class="text-sm text-slate-500 text-center animate-pulse">Hệ thống đang tiếp nhận
-                    file PDF...</p>
+                <h3 class="text-xl font-bold text-slate-800 mb-2" id="loading-title">Đang tải tệp tin lên</h3>
+                <p id="loading-text" class="text-sm text-slate-500 text-center animate-pulse mb-4">Hệ thống đang tiếp
+                    nhận file PDF...</p>
+
+                <!-- Progress Bar dành cho việc Upload -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 mb-2 hidden" id="progress-container">
+                    <div class="bg-emerald-600 h-2.5 rounded-full" id="progress-bar" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-xs font-bold text-emerald-600 hidden">0%</p>
             </div>
         </div>
 
@@ -185,25 +191,94 @@
 
         if (form) {
             form.addEventListener('submit', function (e) {
-                // Hiển thị Overlay chặn tương tác
+                // Prevent default form behavior since we'll handle the upload via JS
+                e.preventDefault();
+
+                const fileInput = document.getElementById('file-upload');
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                const companyName = document.getElementById('company_name').value;
+                const year = document.getElementById('year').value;
+
+                // Hiển thị Overlay chặn tương tác và Progress Bar
                 overlay.classList.remove('hidden');
+                document.getElementById('progress-container').classList.remove('hidden');
+                document.getElementById('progress-text').classList.remove('hidden');
 
-                // Các câu thông báo sẽ luân phiên hiện ra trong lúc đợi upload
-                const messages = [
-                    "Đang truyền dữ liệu lên máy chủ...",
-                    "File lớn có thể mất vài giây để tải lên...",
-                    "Vui lòng đợi trong giây lát..."
-                ];
+                loadingText.innerText = "Đang cắt nhỏ file để truyền đi mạng yếu...";
 
-                let i = 0;
-                const interval = setInterval(() => {
-                    i++;
-                    if (i < messages.length) {
-                        loadingText.innerText = messages[i];
-                    } else {
-                        clearInterval(interval);
+                // UUID tạo mộc ở client để xác định file
+                const jobId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
+                const chunkSize = 1024 * 1024; // 1MB mỗi mảnh
+                const totalChunks = Math.ceil(file.size / chunkSize);
+                let currentChunk = 0;
+
+                const uploadNextChunk = async () => {
+                    const start = currentChunk * chunkSize;
+                    const end = Math.min(start + chunkSize, file.size);
+                    const chunk = file.slice(start, end);
+
+                    const formData = new FormData();
+                    formData.append("chunk", chunk);
+                    formData.append("job_id", jobId);
+                    formData.append("chunk_index", currentChunk);
+                    formData.append("total_chunks", totalChunks);
+                    formData.append("filename", file.name);
+
+                    try {
+                        const response = await fetch('/api/upload-chunk', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) throw new Error("Network response was not ok");
+
+                        currentChunk++;
+
+                        // Update Progress UI
+                        const percentage = Math.round((currentChunk / totalChunks) * 100);
+                        document.getElementById('progress-bar').style.width = percentage + "%";
+                        document.getElementById('progress-text').innerText = percentage + "%";
+                        loadingText.innerText = `Đang truyền dữ liệu lên máy chủ (${currentChunk}/${totalChunks} mảnh)...`;
+
+                        if (currentChunk < totalChunks) {
+                            // Gửi tiếp mảnh tiếp theo
+                            uploadNextChunk();
+                        } else {
+                            // Đã gửi xong 100%, báo server đóng file và bắt đầu Background Task
+                            document.getElementById('loading-title').innerText = "Hoàn thiện dữ liệu";
+                            loadingText.innerText = "Đang báo Server bắt đầu xử lý...";
+
+                            const completeFormData = new FormData();
+                            completeFormData.append("job_id", jobId);
+                            completeFormData.append("filename", file.name);
+                            completeFormData.append("company_name", companyName);
+                            completeFormData.append("year", year);
+
+                            const completeResponse = await fetch('/api/upload-complete', {
+                                method: 'POST',
+                                body: completeFormData
+                            });
+
+                            const completeData = await completeResponse.json();
+                            if (completeData.status === "success" && completeData.job_id) {
+                                window.location.href = "/processing/" + completeData.job_id;
+                            } else {
+                                throw new Error(completeData.message || "Failed to start Processing");
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Lỗi khi upload:', error);
+                        document.getElementById('loading-title').innerText = "Đã xảy ra lỗi!";
+                        loadingText.innerText = "Hệ thống mạng không ổn định hoặc lỗi máy chủ, xin thử lại.";
+                        document.getElementById('progress-bar').classList.replace('bg-emerald-600', 'bg-red-500');
+                        document.getElementById('progress-text').classList.replace('text-emerald-600', 'text-red-500');
                     }
-                }, 2000); // Đổi text sau mỗi 2 giây
+                };
+
+                // Bắt đầu upload mảnh đầu tiên
+                uploadNextChunk();
             });
         }
     });
