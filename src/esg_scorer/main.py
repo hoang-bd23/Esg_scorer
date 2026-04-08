@@ -115,6 +115,16 @@ def background_score_single(job_id: str, temp_path: str, company_name: str, year
             job.status = "error"
             db.commit()
     finally:
+        # Push lên GCS Bucket trước khi xóa file tạm
+        try:
+            from .utils.gcs_utils import upload_to_gcs
+            bucket_name = os.environ.get("GCP_BUCKET_NAME", "rag_bucket_us-central1")
+            file_name = os.path.basename(temp_path)
+            # Optional: có thể đổi đường dẫn trên bucket tuỳ ý, ở đây sẽ lưu vào thư mục documents/
+            upload_to_gcs(bucket_name, temp_path, f"documents/{file_name}")
+        except Exception as e:
+            logger.error(f"Background: GCS Sync báo lỗi: {e}")
+
         # Xóa file tạm
         try:
             if os.path.exists(temp_path):
