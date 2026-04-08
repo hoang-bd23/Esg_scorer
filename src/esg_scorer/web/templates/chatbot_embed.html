@@ -1,0 +1,23 @@
+<!-- 
+    Vertex AI Chatbot Widget (Dialogflow CX Messenger)
+    
+    File này chứa widget chatbot AI, được include từ base.html.
+    Để tích hợp chatbot vào website khác, chỉ cần copy file này
+    và thêm {% include 'chatbot_embed.html' %} vào template chính.
+    
+    Cấu hình:
+    - location: us-central1
+    - project-id: prj-dev-buiduchoang
+    - agent-id: ee01fb0f-9f0f-43ee-84d0-0cc05f9acb02
+    - language: vi (Tiếng Việt)
+-->
+<df-messenger
+    location="us-central1"
+    project-id="prj-dev-buiduchoang"
+    agent-id="ee01fb0f-9f0f-43ee-84d0-0cc05f9acb02"
+    language-code="vi"
+    max-query-length="-1">
+    <df-messenger-chat-bubble
+        chat-title="AI Assistant">
+    </df-messenger-chat-bubble>
+</df-messenger>
