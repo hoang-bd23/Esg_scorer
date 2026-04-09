@@ -1,0 +1,44 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+      - version_running_on_home_server
+      # Nhập thêm các nhánh khác nếu muốn deploy tự động
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Lấy tên nhánh đang được push
+        id: branch_name
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      - name: Deploy qua SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            echo "Đang triển khai nhánh: ${{ steps.branch_name.outputs.branch }}"
+            cd /var/www/Esg_scorer
+            
+            # Khôi phục các thay đổi nội bộ (nếu có để tránh xung đột)
+            git reset --hard HEAD
+            
+            # Nạp thông tin git từ origin
+            git fetch origin
+            
+            # Di chuyển sang nhánh tương ứng được push
+            git checkout ${{ steps.branch_name.outputs.branch }}
+            
+            # Lấy code mới nhất
+            git pull origin ${{ steps.branch_name.outputs.branch }}
+            
+            # Restart service
+            sudo systemctl restart esg_scorer
+            
+            echo "Triển khai hoàn tất thành công!"
