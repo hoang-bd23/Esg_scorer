@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Chấm điểm ESG Số hóa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+        // Tránh nhấp nháy giao diện khi load
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Dialogflow CX Messenger (Vertex AI Chatbot) -->
@@ -41,10 +52,10 @@
     </style>
 </head>
 
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 dark:text-slate-100 dark:bg-slate-900 antialiased min-h-screen flex flex-col transition-colors duration-300">
 
     <!-- Navbar -->
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <nav class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -55,7 +66,11 @@
                             class="text-emerald-500">Scorer</span></span>
                 </a>
                 <div class="flex items-center space-x-6">
-                    <a href="/" class="text-slate-600 hover:text-emerald-500 font-medium transition-colors">Bảng xếp
+                    <button id="theme-toggle" class="text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg p-2.5 transition-colors focus:outline-none">
+                        <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
+                        <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
+                    </button>
+                    <a href="/" class="text-slate-600 dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 font-medium transition-colors">Bảng xếp
                         hạng</a>
                     <a href="/upload"
                         class="bg-slate-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
@@ -71,14 +86,51 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-slate-50 border-t border-slate-200 py-8 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
+    <footer class="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 mt-auto transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 dark:text-slate-400 text-sm">
             <p>&copy; 2026 ESG Scorer. Hệ thống tự động phân tích và chấm điểm ESG doanh nghiệp Việt Nam.</p>
             <p class="mt-2 text-xs">Phát triển dựa trên khung KLD ESG Framework.</p>
         </div>
     </footer>
 
     {% block scripts %}{% endblock %}
+
+    <!-- Script điều khiển Dark Mode -->
+    <script>
+        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        var themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (localStorage.getItem('theme')) {
+                if (localStorage.getItem('theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+        });
+    </script>
 
     <!-- Vertex AI Chatbot Widget -->
     {% include 'chatbot_embed.html' %}
