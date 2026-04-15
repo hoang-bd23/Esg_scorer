@@ -2,15 +2,15 @@
     Vertex AI Chatbot Widget (Dialogflow CX Messenger)
     
     File này chứa widget chatbot AI, được include từ base.html.
-    Widget được bảo vệ bằng mật mã truy cập.
-    Chỉ người dùng nhập đúng mật mã mới thấy và sử dụng được chatbot.
+    Widget được bảo vệ bằng mật mã xác thực qua Server API.
+    Mật mã KHÔNG nằm trong mã nguồn, mà được lưu trong biến môi trường
+    CHATBOT_ACCESS_CODE trên Server Ubuntu.
     
     Cấu hình:
     - location: us-central1
     - project-id: prj-dev-buiduchoang
     - agent-id: ee01fb0f-9f0f-43ee-84d0-0cc05f9acb02
     - language: vi (Tiếng Việt)
-    - access-code: esg2026 (có thể thay đổi bên dưới)
 -->
 
 <!-- Container chatbot (ẩn theo mặc định) -->
@@ -103,7 +103,7 @@
             margin-top: 8px;
             display: none;
             font-weight: 600;
-        ">Mật mã không đúng. Vui lòng thử lại.</p>
+        "></p>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button id="chatbot-auth-cancel" style="
                 flex: 1;
@@ -135,12 +135,6 @@
 
 <script>
     (function () {
-        // ═══════════════════════════════════════════
-        //  MẬT MÃ TRUY CẬP CHATBOT (Thay đổi ở đây)
-        // ═══════════════════════════════════════════
-        const ACCESS_CODE = 'esg2026';
-        // ═══════════════════════════════════════════
-
         const container = document.getElementById('chatbot-container');
         const unlockBtn = document.getElementById('chatbot-unlock-btn');
         const modal = document.getElementById('chatbot-auth-modal');
@@ -149,7 +143,7 @@
         const cancelBtn = document.getElementById('chatbot-auth-cancel');
         const submitBtn = document.getElementById('chatbot-auth-submit');
 
-        // Kiểm tra nếu đã xác thực trước đó (lưu trong localStorage)
+        // Kiểm tra nếu đã xác thực trước đó (token lưu trong localStorage)
         function isAuthenticated() {
             return localStorage.getItem('chatbot_auth') === 'granted';
         }
@@ -185,22 +179,46 @@
             }
         });
 
-        // Xử lý xác thực
+        // Xử lý xác thực qua Server API
         function authenticate() {
-            const code = codeInput.value.trim();
-            if (code === ACCESS_CODE) {
-                localStorage.setItem('chatbot_auth', 'granted');
-                modal.style.display = 'none';
-                showChatbot();
-            } else {
-                errorMsg.style.display = 'block';
-                codeInput.style.borderColor = '#ef4444';
-                codeInput.value = '';
-                codeInput.focus();
-                setTimeout(function () {
-                    codeInput.style.borderColor = '#e2e8f0';
-                }, 1500);
-            }
+            var code = codeInput.value.trim();
+            if (!code) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang xác thực...';
+
+            var formData = new FormData();
+            formData.append('code', code);
+
+            fetch('/api/chatbot-auth', {
+                method: 'POST',
+                body: formData
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.status === 'granted') {
+                        localStorage.setItem('chatbot_auth', 'granted');
+                        modal.style.display = 'none';
+                        showChatbot();
+                    } else {
+                        errorMsg.textContent = data.message || 'Mật mã không đúng. Vui lòng thử lại.';
+                        errorMsg.style.display = 'block';
+                        codeInput.style.borderColor = '#ef4444';
+                        codeInput.value = '';
+                        codeInput.focus();
+                        setTimeout(function () {
+                            codeInput.style.borderColor = '#e2e8f0';
+                        }, 1500);
+                    }
+                })
+                .catch(function () {
+                    errorMsg.textContent = 'Lỗi kết nối đến máy chủ';
+                    errorMsg.style.display = 'block';
+                })
+                .finally(function () {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Xác nhận';
+                });
         }
 
         // Nhấn nút Xác nhận

@@ -255,3 +255,20 @@ async def delete_result(result_id: int):
         return RedirectResponse(url="/", status_code=303)
     finally:
         db.close()
+
+
+# ─── Chatbot Access Control ──────────────────────────────────
+@app.post("/api/chatbot-auth")
+async def chatbot_auth(code: str = Form(...)):
+    """Xác thực mật mã truy cập chatbot AI.
+    Mật mã được lưu trong biến môi trường CHATBOT_ACCESS_CODE trên server,
+    không bao giờ xuất hiện trong mã nguồn."""
+    expected = os.environ.get("CHATBOT_ACCESS_CODE", "")
+    if not expected:
+        # Nếu chưa cấu hình biến môi trường → từ chối toàn bộ
+        return {"status": "error", "message": "Chatbot chưa được cấu hình trên server."}
+    if code == expected:
+        return {"status": "granted"}
+    else:
+        return {"status": "denied"}
+
