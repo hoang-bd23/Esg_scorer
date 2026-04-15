@@ -4,8 +4,8 @@
 <div class="space-y-6">
     <div class="flex justify-between items-end mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-slate-800">Bảng Xếp Hạng ESG</h1>
-            <p class="text-slate-500 mt-1">Tổng hợp điểm số các doanh nghiệp đã được đánh giá</p>
+            <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100">Bảng Xếp Hạng ESG</h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-1">Tổng hợp điểm số các doanh nghiệp đã được đánh giá</p>
         </div>
         <div>
             <a href="/upload"
@@ -20,27 +20,41 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200">
-                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Hạng</th>
-                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Doanh nghiệp</th>
-                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Năm
+                    <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
+                        <th
+                            class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                            Hạng</th>
+                        <th
+                            class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider">
+                            Doanh nghiệp</th>
+                        <th
+                            class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider text-center">
+                            Năm
                         </th>
-                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">
+                        <th
+                            class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider text-center">
                             Environment (E)</th>
-                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Social
+                        <th
+                            class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider text-center">
+                            Social
                             (S)</th>
-                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">
+                        <th
+                            class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider text-center">
                             Governance (G)</th>
-                        <th class="p-4 text-xs font-bold text-emerald-600 uppercase tracking-wider text-center">Tổng ESG
+                        <th
+                            class="p-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider text-center">
+                            Tổng ESG
                         </th>
-                        <th class="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Ngày
+                        <th
+                            class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider text-center">
+                            Ngày
                             phân tích</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-600">
                     {% if not results %}
                     <tr>
-                        <td colspan="8" class="p-8 text-center text-slate-500">
+                        <td colspan="8" class="p-8 text-center text-slate-500 dark:text-slate-400">
                             Chưa có dữ liệu nào. Hãy <a href="/upload" class="text-emerald-500 font-medium">chấm điểm
                                 báo cáo đầu tiên</a>!
                         </td>
@@ -48,10 +62,10 @@
                     {% endif %}
 
                     {% for item in results %}
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-4 text-slate-700 font-medium">#{{ loop.index }}</td>
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <td class="p-4 text-slate-700 dark:text-slate-200 font-medium">#{{ loop.index }}</td>
                         <td class="p-4">
-                            <div class="font-bold text-slate-800">{{ item.company_name }}</div>
+                            <div class="font-bold text-slate-800 dark:text-slate-100">{{ item.company_name }}</div>
                             <div class="flex items-center gap-3 mt-1">
                                 <a href="/result/{{ item.id }}"
                                     class="text-xs text-emerald-600 hover:text-emerald-700 hover:underline inline-block"><i
@@ -64,13 +78,17 @@
                                 </form>
                             </div>
                         </td>
-                        <td class="p-4 text-center text-slate-600">{{ item.year }}</td>
-                        <td class="p-4 text-center font-medium text-green-600">{{ "%.1f"|format(item.e_score) }}</td>
-                        <td class="p-4 text-center font-medium text-blue-600">{{ "%.1f"|format(item.s_score) }}</td>
-                        <td class="p-4 text-center font-medium text-purple-600">{{ "%.1f"|format(item.g_score) }}</td>
-                        <td class="p-4 text-center text-lg font-black text-emerald-600">{{
+                        <td class="p-4 text-center text-slate-600 dark:text-slate-300">{{ item.year }}</td>
+                        <td class="p-4 text-center font-medium text-green-600 dark:text-green-400">{{
+                            "%.1f"|format(item.e_score) }}</td>
+                        <td class="p-4 text-center font-medium text-blue-600 dark:text-blue-400">{{
+                            "%.1f"|format(item.s_score) }}</td>
+                        <td class="p-4 text-center font-medium text-purple-600 dark:text-purple-400">{{
+                            "%.1f"|format(item.g_score) }}</td>
+                        <td class="p-4 text-center text-lg font-black text-emerald-600 dark:text-emerald-400">{{
                             "%.2f"|format(item.total_esg_score) }}</td>
-                        <td class="p-4 text-center text-sm text-slate-500">{{ item.created_at.strftime("%d/%m/%Y") }}
+                        <td class="p-4 text-center text-sm text-slate-500 dark:text-slate-400">{{
+                            item.created_at.strftime("%d/%m/%Y") }}
                         </td>
                     </tr>
                     {% endfor %}

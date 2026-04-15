@@ -20,7 +20,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Dialogflow CX Messenger (Vertex AI Chatbot) -->
-    <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+    <link rel="stylesheet"
+        href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
     <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -30,11 +31,22 @@
             background-color: #f8fafc;
         }
 
+        .dark body,
+        html.dark body {
+            background-color: #0f172a;
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
         }
 
         /* Vertex AI Chatbot Widget */
@@ -52,10 +64,12 @@
     </style>
 </head>
 
-<body class="text-slate-800 dark:text-slate-100 dark:bg-slate-900 antialiased min-h-screen flex flex-col transition-colors duration-300">
+<body
+    class="text-slate-800 dark:text-slate-100 dark:bg-slate-900 antialiased min-h-screen flex flex-col transition-colors duration-300">
 
     <!-- Navbar -->
-    <nav class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
+    <nav
+        class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -66,11 +80,14 @@
                             class="text-emerald-500">Scorer</span></span>
                 </a>
                 <div class="flex items-center space-x-6">
-                    <button id="theme-toggle" class="text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg p-2.5 transition-colors focus:outline-none">
+                    <button id="theme-toggle"
+                        class="text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg p-2.5 transition-colors focus:outline-none">
                         <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
                         <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
                     </button>
-                    <a href="/" class="text-slate-600 dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 font-medium transition-colors">Bảng xếp
+                    <a href="/"
+                        class="text-slate-600 dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 font-medium transition-colors">Bảng
+                        xếp
                         hạng</a>
                     <a href="/upload"
                         class="bg-slate-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
@@ -86,7 +103,8 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 mt-auto transition-colors duration-300">
+    <footer
+        class="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 mt-auto transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 dark:text-slate-400 text-sm">
             <p>&copy; 2026 ESG Scorer. Hệ thống tự động phân tích và chấm điểm ESG doanh nghiệp Việt Nam.</p>
             <p class="mt-2 text-xs">Phát triển dựa trên khung KLD ESG Framework.</p>
@@ -108,7 +126,7 @@
 
         var themeToggleBtn = document.getElementById('theme-toggle');
 
-        themeToggleBtn.addEventListener('click', function() {
+        themeToggleBtn.addEventListener('click', function () {
             themeToggleDarkIcon.classList.toggle('hidden');
             themeToggleLightIcon.classList.toggle('hidden');
 

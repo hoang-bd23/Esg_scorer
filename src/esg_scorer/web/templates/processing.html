@@ -12,17 +12,19 @@
                 class="fa-solid fa-leaf absolute inset-0 m-auto text-emerald-500 flex items-center justify-center text-2xl"></i>
         </div>
 
-        <h2 class="text-2xl font-bold text-slate-800 mb-3" id="status-title">Hệ thống đang phân tích dữ liệu...</h2>
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3" id="status-title">Hệ thống đang phân tích
+            dữ liệu...</h2>
 
-        <p class="text-slate-500 mb-6" id="status-desc">
+        <p class="text-slate-500 dark:text-slate-400 mb-6" id="status-desc">
             Vui lòng không đóng trình duyệt.<br>
             Quá trình trích xuất văn bản và chấm điểm ESG có thể mất từ 1 đến 2 phút tùy dung lượng file.
         </p>
 
         <!-- Dynamic Log Messages -->
         <div
-            class="w-full bg-slate-50 rounded-lg p-4 border border-slate-200 text-left mb-6 max-h-32 overflow-hidden relative">
-            <div class="flex items-center text-sm font-medium text-slate-700 mb-2 border-b border-slate-200 pb-2">
+            class="w-full bg-slate-50 dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600 text-left mb-6 max-h-32 overflow-hidden relative">
+            <div
+                class="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 border-b border-slate-200 dark:border-slate-600 pb-2">
                 <i class="fa-solid fa-terminal mr-2 text-slate-400"></i> Trạng thái hệ thống:
             </div>
             <p id="dynamic-log" class="text-emerald-600 text-sm font-mono animate-pulse">
