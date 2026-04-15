@@ -2,22 +2,215 @@
     Vertex AI Chatbot Widget (Dialogflow CX Messenger)
     
     File này chứa widget chatbot AI, được include từ base.html.
-    Để tích hợp chatbot vào website khác, chỉ cần copy file này
-    và thêm directive include vào template chính.
+    Widget được bảo vệ bằng mật mã truy cập.
+    Chỉ người dùng nhập đúng mật mã mới thấy và sử dụng được chatbot.
     
     Cấu hình:
     - location: us-central1
     - project-id: prj-dev-buiduchoang
     - agent-id: ee01fb0f-9f0f-43ee-84d0-0cc05f9acb02
     - language: vi (Tiếng Việt)
+    - access-code: esg2026 (có thể thay đổi bên dưới)
 -->
-<df-messenger
-    location="us-central1"
-    project-id="prj-dev-buiduchoang"
-    agent-id="ee01fb0f-9f0f-43ee-84d0-0cc05f9acb02"
-    language-code="vi"
-    max-query-length="-1">
-    <df-messenger-chat-bubble
-        chat-title="AI Assistant">
-    </df-messenger-chat-bubble>
-</df-messenger>
+
+<!-- Container chatbot (ẩn theo mặc định) -->
+<div id="chatbot-container" style="display: none;">
+    <df-messenger location="us-central1" project-id="prj-dev-buiduchoang"
+        agent-id="ee01fb0f-9f0f-43ee-84d0-0cc05f9acb02" language-code="vi" max-query-length="-1">
+        <df-messenger-chat-bubble chat-title="AI Assistant">
+        </df-messenger-chat-bubble>
+    </df-messenger>
+</div>
+
+<!-- Nút mở khoá chatbot (Chỉ hiện khi chưa xác thực) -->
+<button id="chatbot-unlock-btn" title="Mở khoá AI Chatbot" style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 998;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 2px solid rgba(100, 116, 139, 0.3);
+        background: rgba(30, 41, 59, 0.85);
+        backdrop-filter: blur(8px);
+        color: #94a3b8;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    "
+    onmouseover="this.style.background='rgba(16,185,129,0.9)'; this.style.color='white'; this.style.borderColor='rgba(16,185,129,0.5)';"
+    onmouseout="this.style.background='rgba(30,41,59,0.85)'; this.style.color='#94a3b8'; this.style.borderColor='rgba(100,116,139,0.3)';">
+    <i class="fa-solid fa-lock"></i>
+</button>
+
+<!-- Modal nhập mật mã -->
+<div id="chatbot-auth-modal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 360px;
+        width: 90%;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        text-align: center;
+    " class="dark:!bg-slate-800">
+        <div style="
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+        ">
+            <i class="fa-solid fa-robot" style="color: white; font-size: 24px;"></i>
+        </div>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;" class="text-slate-800 dark:text-slate-100">
+            Mở khoá AI Chatbot
+        </h3>
+        <p style="font-size: 13px; margin-bottom: 20px;" class="text-slate-500 dark:text-slate-400">
+            Nhập mật mã truy cập để sử dụng trợ lý AI.
+        </p>
+        <input id="chatbot-access-code" type="password" placeholder="Nhập mật mã..." autocomplete="off" style="
+                width: 100%;
+                padding: 10px 14px;
+                border: 2px solid #e2e8f0;
+                border-radius: 10px;
+                font-size: 14px;
+                outline: none;
+                transition: border-color 0.2s;
+                box-sizing: border-box;
+                text-align: center;
+                letter-spacing: 4px;
+                font-weight: 600;
+            " class="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100"
+            onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">
+        <p id="chatbot-auth-error" style="
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+            font-weight: 600;
+        ">Mật mã không đúng. Vui lòng thử lại.</p>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="chatbot-auth-cancel" style="
+                flex: 1;
+                padding: 10px;
+                border-radius: 10px;
+                border: 1px solid #e2e8f0;
+                background: transparent;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            " class="text-slate-600 dark:text-slate-300 dark:border-slate-600">Huỷ</button>
+            <button id="chatbot-auth-submit" style="
+                flex: 1;
+                padding: 10px;
+                border-radius: 10px;
+                border: none;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+            ">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // ═══════════════════════════════════════════
+        //  MẬT MÃ TRUY CẬP CHATBOT (Thay đổi ở đây)
+        // ═══════════════════════════════════════════
+        const ACCESS_CODE = 'esg2026';
+        // ═══════════════════════════════════════════
+
+        const container = document.getElementById('chatbot-container');
+        const unlockBtn = document.getElementById('chatbot-unlock-btn');
+        const modal = document.getElementById('chatbot-auth-modal');
+        const codeInput = document.getElementById('chatbot-access-code');
+        const errorMsg = document.getElementById('chatbot-auth-error');
+        const cancelBtn = document.getElementById('chatbot-auth-cancel');
+        const submitBtn = document.getElementById('chatbot-auth-submit');
+
+        // Kiểm tra nếu đã xác thực trước đó (lưu trong localStorage)
+        function isAuthenticated() {
+            return localStorage.getItem('chatbot_auth') === 'granted';
+        }
+
+        // Hiện chatbot
+        function showChatbot() {
+            container.style.display = 'block';
+            unlockBtn.style.display = 'none';
+        }
+
+        // Nếu đã xác thực rồi thì tự hiện luôn
+        if (isAuthenticated()) {
+            showChatbot();
+        }
+
+        // Nhấn nút ổ khóa → mở Modal
+        unlockBtn.addEventListener('click', function () {
+            modal.style.display = 'flex';
+            codeInput.value = '';
+            errorMsg.style.display = 'none';
+            setTimeout(function () { codeInput.focus(); }, 100);
+        });
+
+        // Nhấn nút Huỷ → đóng Modal
+        cancelBtn.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+        // Nhấn ra ngoài modal → đóng
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Xử lý xác thực
+        function authenticate() {
+            const code = codeInput.value.trim();
+            if (code === ACCESS_CODE) {
+                localStorage.setItem('chatbot_auth', 'granted');
+                modal.style.display = 'none';
+                showChatbot();
+            } else {
+                errorMsg.style.display = 'block';
+                codeInput.style.borderColor = '#ef4444';
+                codeInput.value = '';
+                codeInput.focus();
+                setTimeout(function () {
+                    codeInput.style.borderColor = '#e2e8f0';
+                }, 1500);
+            }
+        }
+
+        // Nhấn nút Xác nhận
+        submitBtn.addEventListener('click', authenticate);
+
+        // Nhấn Enter trong ô input
+        codeInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                authenticate();
+            }
+        });
+    })();
+</script>
