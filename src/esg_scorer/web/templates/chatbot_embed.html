@@ -143,9 +143,18 @@
         const cancelBtn = document.getElementById('chatbot-auth-cancel');
         const submitBtn = document.getElementById('chatbot-auth-submit');
 
-        // Kiểm tra nếu đã xác thực trước đó (token lưu trong localStorage)
+        // Thời gian hết hạn phiên xác thực (2 giờ = 7200000 ms)
+        var SESSION_DURATION_MS = 2 * 60 * 60 * 1000;
+
+        // Kiểm tra nếu đã xác thực và chưa hết hạn
         function isAuthenticated() {
-            return localStorage.getItem('chatbot_auth') === 'granted';
+            var authTime = localStorage.getItem('chatbot_auth_time');
+            if (!authTime) return false;
+            var elapsed = Date.now() - parseInt(authTime, 10);
+            if (elapsed < SESSION_DURATION_MS) return true;
+            // Hết hạn → dọn dẹp
+            localStorage.removeItem('chatbot_auth_time');
+            return false;
         }
 
         // Hiện chatbot
@@ -197,7 +206,7 @@
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
                     if (data.status === 'granted') {
-                        localStorage.setItem('chatbot_auth', 'granted');
+                        localStorage.setItem('chatbot_auth_time', Date.now().toString());
                         modal.style.display = 'none';
                         showChatbot();
                     } else {
